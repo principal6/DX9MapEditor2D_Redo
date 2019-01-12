@@ -3,43 +3,51 @@
 #include "Core/DX9Base.h"
 #include "DX9Map.h"
 
-class DX9MapEditor final : public DX9Common
+namespace DX9ENGINE
 {
-private:
-	static const int WINDOW_X = 50;
-	static const int WINDOW_Y = 50;
-	static const int WINDOW_SEPERATE_X = 250;
-	static const int WINDOW_SEPERATE_INTERVAL = 10;
-	static const int WINDOW_VSCROLL_SIZE = 15;
-	static const int WINDOW_HSCROLL_SIZE = 15;
-	static const int WINDOW_PADDING_X = 10;
+	struct MapTileInfo
+	{
+		WSTRING TileName;
+	};
 
-	static DX9Base* ms_BaseParent;
-	static DX9Base* ms_BaseLeft;
-	static DX9Base* ms_BaseRight;
-	static RECT ms_TempRect;
+	class DX9MapEditor final : public DX9Common
+	{
+	private:
+		static const int WINDOW_X = 50;
+		static const int WINDOW_Y = 50;
+		static const int WINDOW_SEPERATE_X = 250;
+		static const int WINDOW_SEPERATE_INTERVAL = 10;
+		static const int WINDOW_VSCROLL_SIZE = 15;
+		static const int WINDOW_HSCROLL_SIZE = 15;
+		static const int WINDOW_PADDING_X = 10;
 
-	bool m_Keys[NUM_KEYS];
-	MSG m_MSG;
+		static DX9Base* ms_BaseParent;
+		static DX9Base* ms_BaseLeft;
+		static DX9Base* ms_BaseRight;
+		static RECT ms_TempRect;
 
-	DX9Map* m_Map;
-	DX9Image* m_Image;
+		bool m_Keys[NUM_KEYS];
+		MSG m_MSG;
 
-private:
-	void DX9MapEditor::Destroy() override;
+		DX9Map* m_Map;
+		DX9Image* m_Image;
 
-	friend RECT GetLeftChildWindowPositionAndSize(RECT Rect);
-	friend RECT GetRightChildWindowPositionAndSize(RECT Rect);
-	friend LRESULT CALLBACK ParentWindowProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
+	private:
+		void DX9MapEditor::Destroy() override;
 
-public:
-	DX9MapEditor() {};
-	~DX9MapEditor() {};
+		friend RECT GetLeftChildWindowPositionAndSize(RECT Rect);
+		friend RECT GetRightChildWindowPositionAndSize(RECT Rect);
+		friend LRESULT CALLBACK ParentWindowProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
 
-	DX9Common::ReturnValue DX9MapEditor::Create(int Width, int Height);
-	DX9Common::ReturnValue DX9MapEditor::LoadMap(WSTRING FileName);
+	public:
+		DX9MapEditor() {};
+		~DX9MapEditor() {};
 
-	void DX9MapEditor::Run();
+		auto DX9MapEditor::Create(int Width, int Height)->Error;
+		auto DX9MapEditor::LoadMap(WSTRING FileName)->Error;
 
-	void DX9MapEditor::MainLoop();
+		void DX9MapEditor::Run();
+
+		void DX9MapEditor::MainLoop();
+	};
 };

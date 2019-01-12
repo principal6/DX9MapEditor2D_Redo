@@ -1,16 +1,19 @@
 #include "DX9Map.h"
 
+using namespace DX9ENGINE;
+
 // Static member variables declaration
 const int DX9Map::MAX_LINE_LEN = 1024;
 const int DX9Map::MAX_TILEID_LEN = 3;
 const int DX9Map::MAX_MOVEID_LEN = 2;
 const int DX9Map::MOVE_ALPHA = 100;
 const int DX9Map::DEF_TILE_SIZE = 32;
+const int DX9Map::DEPTH_HELL = 10;
 
 /*-----------------------------------------------------------------------------
 	Static method declaration
 -----------------------------------------------------------------------------*/
-DX9Common::FloatUV DX9Map::ConvertIDtoUV(int ID, int TileSize, int SheetW, int SheetH)
+auto DX9Map::ConvertIDtoUV(int ID, int TileSize, int SheetW, int SheetH)->FloatUV
 {
 	FloatUV Result;
 	int tTileCols, tTileRows;
@@ -29,7 +32,7 @@ DX9Common::FloatUV DX9Map::ConvertIDtoUV(int ID, int TileSize, int SheetW, int S
 	return Result;
 }
 
-D3DXVECTOR2 DX9Map::ConvertIDToXY(int MapID, int MapCols)
+auto DX9Map::ConvertIDToXY(int MapID, int MapCols)->D3DXVECTOR2
 {
 	D3DXVECTOR2 Result = D3DXVECTOR2(0, 0);
 
@@ -39,12 +42,12 @@ D3DXVECTOR2 DX9Map::ConvertIDToXY(int MapID, int MapCols)
 	return Result;
 }
 
-int DX9Map::ConvertXYToID(D3DXVECTOR2 MapXY, int MapCols)
+auto DX9Map::ConvertXYToID(D3DXVECTOR2 MapXY, int MapCols)->int
 {
 	return static_cast<int>(MapXY.x) + (static_cast<int>(MapXY.y) * MapCols);
 }
 
-D3DXVECTOR2 DX9Map::ConvertPositionToXY(D3DXVECTOR2 Position, D3DXVECTOR2 Offset, int TileSize, bool YRoundUp)
+auto DX9Map::ConvertPositionToXY(D3DXVECTOR2 Position, D3DXVECTOR2 Offset, int TileSize, bool YRoundUp)->D3DXVECTOR2
 {
 	D3DXVECTOR2 Result;
 
@@ -91,19 +94,19 @@ DX9Map::DX9Map()
 	m_OffsetZeroY = 0;
 }
 
-DX9Common::ReturnValue DX9Map::Create(LPDIRECT3DDEVICE9 pDevice, WindowData& refData)
+auto DX9Map::Create(LPDIRECT3DDEVICE9 pDevice, WindowData& refData)->Error
 {
 	if (pDevice == nullptr)
-		return ReturnValue::DEVICE_NULL;
+		return Error::DEVICE_NULL;
 
 	m_pDevice = pDevice;
-	m_WindowData = refData;
+	ms_MainWindowData = refData;
 
 	ClearAllData();
 	m_Vertices.clear();
 	m_Indices.clear();
 
-	return ReturnValue::OK;
+	return Error::OK;
 }
 
 void DX9Map::ClearAllData()
@@ -154,7 +157,7 @@ void DX9Map::SetMoveTexture(WSTRING FileName)
 	}
 
 	WSTRING NewFileName;
-	NewFileName = m_WindowData.AppDir;
+	NewFileName = ms_MainWindowData.AppDir;
 	NewFileName += ASSET_DIR;
 	NewFileName += FileName;
 
@@ -171,7 +174,7 @@ void DX9Map::SetMoveTexture(WSTRING FileName)
 void DX9Map::LoadMap(WSTRING FileName)
 {
 	WSTRING NewFileName;
-	NewFileName = m_WindowData.AppDir;
+	NewFileName = ms_MainWindowData.AppDir;
 	NewFileName += ASSET_DIR;
 	NewFileName += FileName;
 
@@ -324,7 +327,7 @@ void DX9Map::AddEnd()
 	}
 
 	m_bMapCreated = true;
-	m_OffsetZeroY = m_WindowData.WindowHeight - (m_MapRows * m_TileSize);
+	m_OffsetZeroY = ms_MainWindowData.WindowHeight - (m_MapRows * m_TileSize);
 
 	SetGlobalPosition(D3DXVECTOR2(0, 0));
 }
@@ -399,7 +402,7 @@ void DX9Map::ParseMapData(WSTRING Str)
 	CreateLoadedMap(Str);
 }
 
-float DX9Map::GetMapTileBoundary(int MapID, Direction Dir) const
+auto DX9Map::GetMapTileBoundary(int MapID, Direction Dir) const->float
 {
 	float Result = 0.0f;
 
@@ -429,7 +432,7 @@ float DX9Map::GetMapTileBoundary(int MapID, Direction Dir) const
 	return Result;
 }
 
-bool DX9Map::IsMovableTile(int MapID, Direction Dir) const
+auto DX9Map::IsMovableTile(int MapID, Direction Dir) const->bool
 {
 	if ((MapID >= (m_MapCols * m_MapRows)) || (MapID < 0))
 		return true;
@@ -531,7 +534,7 @@ void DX9Map::SetPosition(D3DXVECTOR2 Offset)
 void DX9Map::SetGlobalPosition(D3DXVECTOR2 Offset)
 {
 	float MapH = static_cast<float>(m_MapRows * m_TileSize);
-	float NewOffsetY = m_WindowData.WindowHeight - MapH + Offset.y;
+	float NewOffsetY = ms_MainWindowData.WindowHeight - MapH + Offset.y;
 
 	SetPosition(D3DXVECTOR2(Offset.x, NewOffsetY));
 }
@@ -723,54 +726,54 @@ void DX9Map::GetMapDataPart(int DataID, wchar_t *WC, int size) const
 	wcscpy_s(WC, size, tempStr.c_str());
 }
 
-bool DX9Map::IsMapCreated() const
+auto DX9Map::IsMapCreated() const->bool
 { 
 	return m_bMapCreated;
 };
 
-int DX9Map::GetMapName(WSTRING *pStr) const
+auto DX9Map::GetMapName(WSTRING *pStr) const->int
 {
 	*pStr = m_MapName;
 	return 0;
 }
 
-int DX9Map::GetTileName(WSTRING *pStr) const
+auto DX9Map::GetTileName(WSTRING *pStr) const->int
 {
 	*pStr = m_TileName;
 	return 0;
 }
 
-int DX9Map::GetMapCols() const 
+auto DX9Map::GetMapCols() const->int
 { 
 	return m_MapCols;
 }
 
-int DX9Map::GetMapRows() const
+auto DX9Map::GetMapRows() const->int
 {
 	return m_MapRows;
 }
 
-int DX9Map::GetWidth() const 
+auto DX9Map::GetWidth() const->int
 { 
 	return (m_MapCols * m_TileSize);
 }
 
-int DX9Map::GetHeight() const
+auto DX9Map::GetHeight() const->int
 { 
 	return (m_MapRows * m_TileSize);
 }
 
-D3DXVECTOR2	DX9Map::GetMapOffset() const 
+auto DX9Map::GetMapOffset() const->D3DXVECTOR2
 { 
 	return m_Offset;
 }
 
-int DX9Map::GetMapOffsetZeroY() const
+auto DX9Map::GetMapOffsetZeroY() const->int
 { 
 	return m_OffsetZeroY;
 }
 
-D3DXVECTOR2 DX9Map::GetVelocityAfterCollision(BoundingBox BB, D3DXVECTOR2 Velocity) const
+auto DX9Map::GetVelocityAfterCollision(BoundingBox BB, D3DXVECTOR2 Velocity) const->D3DXVECTOR2
 {
 	D3DXVECTOR2 NewVelocity = Velocity;
 
@@ -825,84 +828,128 @@ D3DXVECTOR2 DX9Map::GetVelocityAfterCollision(BoundingBox BB, D3DXVECTOR2 Veloci
 	float fWall = 0.0f;
 	float fWallCmp = 0.0f;
 
-	if (Velocity.x > 0)
+	int tMapID = 0;
+
+	// Check if the life is inside the map's Y range
+	if ((tYS > m_MapRows + DEPTH_HELL) && (tYE > m_MapRows + DEPTH_HELL))
 	{
-		// Go Right
-		for (int i = tXS; i <= tXE; i++)
+		// If the life reaches the bottom of the hell, make it stop falling
+		NewVelocity.y = 0;
+	}
+
+	// Check if the life is inside the map's X range
+	// If it's outside, it should fall (= no changes in NewVelocity)
+	if (((tXS >= 0) || (tXE >= 0)) && ((tXS < m_MapCols) || (tXE < m_MapCols)))
+	{
+		if (Velocity.x > 0)
 		{
-			for (int j = tYS; j <= tYE; j++)
+			// Go Right
+			for (int i = tXS; i <= tXE; i++)
 			{
-				int tMapID = ConvertXYToID(D3DXVECTOR2(static_cast<float>(i), static_cast<float>(j)), m_MapCols);
-				if (IsMovableTile(tMapID, Direction::Right) == false)
+				for (int j = tYS; j <= tYE; j++)
 				{
-					fWallCmp = GetMapTileBoundary(tMapID, Direction::Left);
-					if (fWall == 0)
+					tMapID = ConvertXYToID(D3DXVECTOR2(static_cast<float>(i), static_cast<float>(j)), m_MapCols);
+					if (IsMovableTile(tMapID, Direction::Right) == false)
 					{
-						fWall = fWallCmp;
-					}
-					else if (fWall && fWallCmp)
-					{
-						fWall = min(fWall, fWallCmp);
+						fWallCmp = GetMapTileBoundary(tMapID, Direction::Left);
+						if (fWall == 0)
+						{
+							fWall = fWallCmp;
+						}
+						else if (fWall && fWallCmp)
+						{
+							fWall = min(fWall, fWallCmp);
+						}
 					}
 				}
 			}
-		}
 
-		if (fWall)
-		{
-			float fCurr = tSprPosS.x + Velocity.x;
-			float fDist = fWall - tSprPosS.x - 0.1f;
-			NewVelocity.x = fDist;
-		}
-	}
-	else if (Velocity.x < 0)
-	{
-		// Go Left
-		for (int i = tXS; i >= tXE; i--)
-		{
-			for (int j = tYS; j <= tYE; j++)
+			if (fWall)
 			{
-				int tMapID = ConvertXYToID(D3DXVECTOR2(static_cast<float>(i), static_cast<float>(j)), m_MapCols);
-				if (IsMovableTile(tMapID, Direction::Left) == false)
+				float fCurr = tSprPosS.x + Velocity.x;
+				float fDist = fWall - tSprPosS.x - 0.1f;
+				NewVelocity.x = fDist;
+			}
+		}
+		else if (Velocity.x < 0)
+		{
+			// Go Left
+			for (int i = tXS; i >= tXE; i--)
+			{
+				for (int j = tYS; j <= tYE; j++)
 				{
-					fWallCmp = GetMapTileBoundary(tMapID, Direction::Right);
-					if (fWall == 0)
+					tMapID = ConvertXYToID(D3DXVECTOR2(static_cast<float>(i), static_cast<float>(j)), m_MapCols);
+					if (IsMovableTile(tMapID, Direction::Left) == false)
 					{
-						fWall = fWallCmp;
-					}
-					else if (fWall && fWallCmp)
-					{
-						fWall = max(fWall, fWallCmp);
+						fWallCmp = GetMapTileBoundary(tMapID, Direction::Right);
+						if (fWall == 0)
+						{
+							fWall = fWallCmp;
+						}
+						else if (fWall && fWallCmp)
+						{
+							fWall = max(fWall, fWallCmp);
+						}
 					}
 				}
 			}
-		}
 
-		if (fWall)
-		{
-			float fCurr = tSprPosS.x + Velocity.x;
-			float fDist = fWall - tSprPosS.x;
-			NewVelocity.x = fDist;
-		}
-	}
-	else if (Velocity.y > 0)
-	{
-		// Go Down
-		for (int i = tXS; i <= tXE; i++)
-		{
-			for (int j = tYS; j <= tYE; j++)
+			if (fWall)
 			{
-				int tMapID = ConvertXYToID(D3DXVECTOR2(static_cast<float>(i), static_cast<float>(j)), m_MapCols);
-				if (IsMovableTile(tMapID, Direction::Down) == false)
+				float fCurr = tSprPosS.x + Velocity.x;
+				float fDist = fWall - tSprPosS.x;
+				NewVelocity.x = fDist;
+			}
+		}
+		else if (Velocity.y > 0)
+		{
+			// Go Down
+			for (int i = tXS; i <= tXE; i++)
+			{
+				for (int j = tYS; j <= tYE; j++)
 				{
-					fWallCmp = GetMapTileBoundary(tMapID, Direction::Up);
-					if (fWall == 0)
+					tMapID = ConvertXYToID(D3DXVECTOR2(static_cast<float>(i), static_cast<float>(j)), m_MapCols);
+					if (IsMovableTile(tMapID, Direction::Down) == false)
 					{
-						fWall = fWallCmp;
+						fWallCmp = GetMapTileBoundary(tMapID, Direction::Up);
+						if (fWall == 0)
+						{
+							fWall = fWallCmp;
+						}
+						else if (fWall && fWallCmp)
+						{
+							fWall = min(fWall, fWallCmp);
+						}
 					}
-					else if (fWall && fWallCmp)
+				}
+
+				if (fWall)
+				{
+					float fCurr = tSprPosS.y + Velocity.y;
+					float fDist = fWall - tSprPosS.y - 0.1f;
+					NewVelocity.y = min(NewVelocity.y, fDist);
+				}
+			}
+		}
+		else if (Velocity.y < 0)
+		{
+			// Go Up
+			for (int i = tXS; i <= tXE; i++)
+			{
+				for (int j = tYS; j >= tYE; j--)
+				{
+					tMapID = ConvertXYToID(D3DXVECTOR2(static_cast<float>(i), static_cast<float>(j)), m_MapCols);
+					if (IsMovableTile(tMapID, Direction::Up) == false)
 					{
-						fWall = min(fWall, fWallCmp);
+						fWallCmp = GetMapTileBoundary(tMapID, Direction::Down);
+						if (fWall == 0)
+						{
+							fWall = fWallCmp;
+						}
+						else if (fWall && fWallCmp)
+						{
+							fWall = max(fWall, fWallCmp);
+						}
 					}
 				}
 			}
@@ -910,40 +957,11 @@ D3DXVECTOR2 DX9Map::GetVelocityAfterCollision(BoundingBox BB, D3DXVECTOR2 Veloci
 			if (fWall)
 			{
 				float fCurr = tSprPosS.y + Velocity.y;
-				float fDist = fWall - tSprPosS.y - 0.1f;
-				NewVelocity.y = min(NewVelocity.y, fDist);
+				float fDist = fWall - tSprPosS.y;
+				NewVelocity.y = max(NewVelocity.y, fDist);
 			}
 		}
 	}
-	else if (Velocity.y < 0)
-	{
-		// Go Up
-		for (int i = tXS; i <= tXE; i++)
-		{
-			for (int j = tYS; j >= tYE; j--)
-			{
-				int tMapID = ConvertXYToID(D3DXVECTOR2(static_cast<float>(i), static_cast<float>(j)), m_MapCols);
-				if (IsMovableTile(tMapID, Direction::Up) == false)
-				{
-					fWallCmp = GetMapTileBoundary(tMapID, Direction::Down);
-					if (fWall == 0)
-					{
-						fWall = fWallCmp;
-					}
-					else if (fWall && fWallCmp)
-					{
-						fWall = max(fWall, fWallCmp);
-					}
-				}
-			}
-		}
-
-		if (fWall)
-		{
-			float fCurr = tSprPosS.y + Velocity.y;
-			float fDist = fWall - tSprPosS.y;
-			NewVelocity.y = max(NewVelocity.y, fDist);
-		}
-	}
+	
 	return NewVelocity;
 }

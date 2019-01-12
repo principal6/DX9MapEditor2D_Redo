@@ -1,8 +1,14 @@
 #include "DX9Common.h"
 
+using namespace DX9ENGINE;
+
+// Static constants
 const float DX9Common::UV_OFFSET = 0.002f;
 const wchar_t DX9Common::ASSET_DIR[] = L"\\Asset\\";
+
+// Static member variable
 HINSTANCE DX9Common::ms_hInstance = nullptr;
+WindowData DX9Common::ms_MainWindowData;
 
 void DX9Common::ConvertFrameIDIntoUV(int FrameID, int NumCols, int NumRows, FloatUV* UV)
 {
@@ -27,7 +33,7 @@ void DX9Common::SethWnd(HWND hWnd)
 	m_hWnd = hWnd;
 }
 
-HWND DX9Common::GethWnd() const
+auto DX9Common::GethWnd() const->HWND
 {
 	return m_hWnd;
 }
