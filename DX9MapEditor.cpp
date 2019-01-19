@@ -37,11 +37,12 @@ LRESULT CALLBACK DX9ENGINE::ParentWindowProc(HWND hWnd, UINT Message, WPARAM wPa
 		// Menu & accelerator
 		switch (LOWORD(wParam)) // in LOWORD of wParam is the resource id
 		{
+		case ID_ACCELERATOR40013: // ACCEL Ctrl + N
 		case ID_MAP_NEWMAP:
 			// Show new map dialog
 			DialogBox(nullptr, MAKEINTRESOURCE(IDD_DIALOG1), DX9MapEditor::ms_BaseParent->GethWnd(), DlgProcNewMap);
 			break;
-
+		case ID_ACCELERATOR40014: // ACCEL Ctrl + O
 		case ID_MAP_OPENMAP:
 			// Show load map dialog
 			if (DX9MapEditor::ms_BaseParent->OpenFileDlg(L"JWM File\0*.jwm\0"))
@@ -58,11 +59,19 @@ LRESULT CALLBACK DX9ENGINE::ParentWindowProc(HWND hWnd, UINT Message, WPARAM wPa
 				}
 			}
 			break;
+		case ID_ACCELERATOR40015: // ACCEL Ctrl + S
+		case ID_MAP_SAVEMAP:
+			break;
+		case ID_ACCELERATOR40008: // ACCEL F2
 		case ID_MODE_TILEMODE:
 			DX9MapEditor::ms_Map->SetMode(DX9Common::MapMode::TileMode);
 			break;
+		case ID_ACCELERATOR40010: // ACCEL F3
 		case ID_MODE_MOVEMODE:
 			DX9MapEditor::ms_Map->SetMode(DX9Common::MapMode::MoveMode);
+			break;
+		case ID_ACCELERATOR40017: // ACCEL F1
+		case ID_HELP_INFO:
 			break;
 		}
 		break;
@@ -201,6 +210,8 @@ auto DX9MapEditor::Create(int Width, int Height)->Error
 		m_hWnd = ms_BaseParent->GethWnd();
 	}
 
+	m_hAccel = LoadAccelerators(nullptr, MAKEINTRESOURCE(IDR_ACCELERATOR1)); // accelator load
+
 	// Set data that will be shared in many sub-classes
 	// For left child window
 	GetCurrentDirectoryW(255, ms_MainWindowData.AppDir);
@@ -256,6 +267,7 @@ auto DX9MapEditor::Create(int Width, int Height)->Error
 
 void DX9MapEditor::Run()
 {
+	/*
 	while (m_MSG.message != WM_QUIT)
 	{
 		if (PeekMessage(&m_MSG, nullptr, 0U, 0U, PM_REMOVE))
@@ -268,11 +280,12 @@ void DX9MapEditor::Run()
 			MainLoop();
 		}
 	}
+	*/
 
-	/*
-		while (GetMessage(&m_MSG, 0, 0, 0))
+	while (GetMessage(&m_MSG, nullptr, 0, 0))
 	{
-		if (!TranslateAccelerator(m_hWnd, hAccel, &m_MSG)) {
+		if (!TranslateAccelerator(m_hWnd, m_hAccel, &m_MSG))
+		{
 			TranslateMessage(&m_MSG);
 			DispatchMessage(&m_MSG);
 
@@ -280,8 +293,7 @@ void DX9MapEditor::Run()
 		}
 	}
 
-	return static_cast<int>(m_MSG.wParam);
-	*/
+	//return static_cast<int>(m_MSG.wParam);
 
 	Destroy();
 }

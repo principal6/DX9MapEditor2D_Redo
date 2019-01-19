@@ -28,6 +28,7 @@ namespace DX9ENGINE
 
 		bool m_Keys[NUM_KEYS];
 		MSG m_MSG;
+		HACCEL m_hAccel;
 
 	private:
 		void DX9MapEditor::Destroy() override;
