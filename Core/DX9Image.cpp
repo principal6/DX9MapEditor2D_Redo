@@ -263,11 +263,6 @@ void DX9Image::SetUVRange(float u1, float u2, float v1, float v2)
 {
 	if (m_Vertices.size())
 	{
-		//@warning: FloatUV offset is done in order to make sure the image borders do not invade contiguous images
-		u1 += UV_OFFSET;
-		v1 += UV_OFFSET;
-		u2 -= UV_OFFSET;
-		v2 -= UV_OFFSET;
 		UpdateVertexData(u1, v1, u2, v2);
 	}
 }

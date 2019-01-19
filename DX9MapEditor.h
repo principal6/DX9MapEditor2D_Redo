@@ -1,15 +1,11 @@
 #pragma once
 
+#include "resource.h"
 #include "Core/DX9Base.h"
 #include "DX9Map.h"
 
 namespace DX9ENGINE
 {
-	struct MapTileInfo
-	{
-		WSTRING TileName;
-	};
-
 	class DX9MapEditor final : public DX9Common
 	{
 	private:
@@ -25,12 +21,13 @@ namespace DX9ENGINE
 		static DX9Base* ms_BaseLeft;
 		static DX9Base* ms_BaseRight;
 		static RECT ms_TempRect;
+		static MapInfo ms_MapInfo;
+		static DX9Image* ms_TileImage;
+		static DX9Image* ms_MoveImage;
+		static DX9Map* ms_Map;
 
 		bool m_Keys[NUM_KEYS];
 		MSG m_MSG;
-
-		DX9Map* m_Map;
-		DX9Image* m_Image;
 
 	private:
 		void DX9MapEditor::Destroy() override;
@@ -38,13 +35,13 @@ namespace DX9ENGINE
 		friend RECT GetLeftChildWindowPositionAndSize(RECT Rect);
 		friend RECT GetRightChildWindowPositionAndSize(RECT Rect);
 		friend LRESULT CALLBACK ParentWindowProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
+		friend LRESULT CALLBACK DlgProcNewMap(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
 	public:
 		DX9MapEditor() {};
 		~DX9MapEditor() {};
 
 		auto DX9MapEditor::Create(int Width, int Height)->Error;
-		auto DX9MapEditor::LoadMap(WSTRING FileName)->Error;
 
 		void DX9MapEditor::Run();
 

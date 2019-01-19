@@ -7,8 +7,11 @@ DX9Base* DX9MapEditor::ms_BaseParent;
 DX9Base* DX9MapEditor::ms_BaseLeft;
 DX9Base* DX9MapEditor::ms_BaseRight;
 RECT DX9MapEditor::ms_TempRect;
+MapInfo DX9MapEditor::ms_MapInfo;
 
-LRESULT CALLBACK DlgProcNewMap(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam);
+DX9Image* DX9MapEditor::ms_TileImage;
+DX9Image* DX9MapEditor::ms_MoveImage;
+DX9Map* DX9MapEditor::ms_Map;
 
 RECT DX9ENGINE::GetLeftChildWindowPositionAndSize(RECT Rect)
 {
@@ -38,8 +41,30 @@ LRESULT CALLBACK DX9ENGINE::ParentWindowProc(HWND hWnd, UINT Message, WPARAM wPa
 			// Show new map dialog
 			DialogBox(nullptr, MAKEINTRESOURCE(IDD_DIALOG1), DX9MapEditor::ms_BaseParent->GethWnd(), DlgProcNewMap);
 			break;
-		}
 
+		case ID_MAP_OPENMAP:
+			// Show load map dialog
+			if (DX9MapEditor::ms_BaseParent->OpenFileDlg(L"JWM File\0*.jwm\0"))
+			{
+				if (DX9MapEditor::ms_BaseParent->GetDlgFileTitle().size())
+				{
+					// Load map
+					DX9MapEditor::ms_Map->LoadMap(DX9MapEditor::ms_BaseParent->GetDlgFileTitle());
+
+					// Load tile image
+					DX9MapEditor::ms_Map->GetMapInfo(&DX9MapEditor::ms_MapInfo);
+					DX9MapEditor::ms_TileImage->SetTexture(DX9MapEditor::ms_MapInfo.TileName);
+					DX9MapEditor::ms_MoveImage->SetTexture(DX9MapEditor::ms_MapInfo.MoveName);
+				}
+			}
+			break;
+		case ID_MODE_TILEMODE:
+			DX9MapEditor::ms_Map->SetMode(DX9Common::MapMode::TileMode);
+			break;
+		case ID_MODE_MOVEMODE:
+			DX9MapEditor::ms_Map->SetMode(DX9Common::MapMode::MoveMode);
+			break;
+		}
 		break;
 	case WM_SIZE:
 		// Resize ms_BaseLeft and ms_BaseRight and their correspondent window in accordance with the parent window size
@@ -91,17 +116,12 @@ LRESULT CALLBACK RightChildWindowProc(HWND hWnd, UINT Message, WPARAM wParam, LP
 	return(DefWindowProc(hWnd, Message, wParam, lParam));
 }
 
-LRESULT CALLBACK DlgProcNewMap(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK DX9ENGINE::DlgProcNewMap(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
-	wchar_t tWC[255] = { 0 };
+	wchar_t tWC[255] {};
 	WSTRING tStr;
-	size_t tFind;
-	int tMapCols = 0;
-	int tMapRows = 0;
-	int tTileSize = 0;
 
 	WSTRING Combobox_Ratio[] = { L"x32", L"x64" };
-	size_t aa = Combobox_Ratio->size();
 	HWND tempHWND;
 
 	switch (iMessage)
@@ -125,44 +145,38 @@ LRESULT CALLBACK DlgProcNewMap(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM l
 		switch (wParam)
 		{
 		case IDC_BUTTON1:
-			//if (g_myWND->OpenFileDlg(L"모든 파일\0*.*\0") == TRUE)
+			if (DX9MapEditor::ms_BaseParent->OpenFileDlg(L"All files\0*.*\0"))
 			{
-				// 타일 이름 얻기
-				//g_strTileName = g_myWND->GetDlgFileName().c_str();
-				//tFind = g_strTileName.find_last_of('\\');
-				//if (tFind)
-				//	g_strTileName = g_strTileName.substr(tFind + 1);
-				//SetWindowText(GetDlgItem(hDlg, IDC_EDIT4), g_strTileName.c_str());
+				// Get the name of the tile
+				DX9MapEditor::ms_MapInfo.TileName = DX9MapEditor::ms_BaseParent->GetDlgFileTitle();
+				SetWindowText(GetDlgItem(hDlg, IDC_EDIT4), DX9MapEditor::ms_MapInfo.TileName.c_str());
 			}
-			break;
-		case IDC_COMBO1:
-
 			break;
 		case IDOK:
 			GetDlgItemText(hDlg, IDC_EDIT4, tWC, 255);
-			tFind = wcslen(tWC);
 
-			if (tFind)
+			if (wcslen(tWC))
 			{
 				GetDlgItemText(hDlg, IDC_EDIT1, tWC, 255);
-				//g_strMapName = tWC;
+				DX9MapEditor::ms_MapInfo.MapName = tWC;
 
-				tMapCols = GetDlgItemInt(hDlg, IDC_EDIT2, FALSE, FALSE);
-				tMapRows = GetDlgItemInt(hDlg, IDC_EDIT3, FALSE, FALSE);
+				DX9MapEditor::ms_MapInfo.MapCols = GetDlgItemInt(hDlg, IDC_EDIT2, FALSE, FALSE);
+				DX9MapEditor::ms_MapInfo.MapRows = GetDlgItemInt(hDlg, IDC_EDIT3, FALSE, FALSE);
 
 				GetDlgItemText(hDlg, IDC_COMBO1, tWC, 255);
 				tStr = tWC;
 				tStr = tStr.substr(1);
-				tTileSize = _wtoi(tStr.c_str());
+				DX9MapEditor::ms_MapInfo.TileSize = _wtoi(tStr.c_str());
 
-				if (tMapCols && tMapRows)
+				if (DX9MapEditor::ms_MapInfo.MapCols && DX9MapEditor::ms_MapInfo.MapRows)
 				{
-					// 타일 불러오기
-					
+					// Create a new map
+					DX9MapEditor::ms_Map->CreateNewMap(&DX9MapEditor::ms_MapInfo);
 
-					// 맵 만들기
-					
-
+					// Load tile image
+					DX9MapEditor::ms_Map->GetMapInfo(&DX9MapEditor::ms_MapInfo);
+					DX9MapEditor::ms_TileImage->SetTexture(DX9MapEditor::ms_MapInfo.TileName);
+					DX9MapEditor::ms_MoveImage->SetTexture(DX9MapEditor::ms_MapInfo.MoveName);
 				}
 			}
 		case IDCANCEL:
@@ -206,10 +220,16 @@ auto DX9MapEditor::Create(int Width, int Height)->Error
 			return Error::BASE_NOT_CREATED;
 	}
 
-	// Create image object
-	if (m_Image = new DX9Image)
+	// Create image objects
+	if (ms_TileImage = new DX9Image)
 	{
-		if (DX_FAILED(m_Image->Create(ms_BaseLeft->GetDevice(), ms_MainWindowData)))
+		if (DX_FAILED(ms_TileImage->Create(ms_BaseLeft->GetDevice(), ms_MainWindowData)))
+			return Error::IMAGE_NOT_CREATED;
+		ms_TileImage->SetSize(0, 0);
+	}
+	if (ms_MoveImage = new DX9Image)
+	{
+		if (DX_FAILED(ms_MoveImage->Create(ms_BaseLeft->GetDevice(), ms_MainWindowData)))
 			return Error::IMAGE_NOT_CREATED;
 	}
 
@@ -225,23 +245,13 @@ auto DX9MapEditor::Create(int Width, int Height)->Error
 	}
 	
 	// Create map object
-	if (m_Map = new DX9Map)
+	if (ms_Map = new DX9Map)
 	{
-		if (DX_FAILED(m_Map->Create(ms_BaseRight->GetDevice(), ms_MainWindowData)))
+		if (DX_FAILED(ms_Map->Create(ms_BaseRight->GetDevice(), ms_MainWindowData)))
 			return Error::MAP_NOT_CREATED;
 	}
 
 	return Error::OK;
-}
-
-auto DX9MapEditor::LoadMap(WSTRING FileName)->Error
-{
-	if (m_Map)
-	{
-		m_Map->LoadMap(FileName);
-		return Error::OK;
-	}
-	return Error::OBJECT_NOT_CREATED;
 }
 
 void DX9MapEditor::Run()
@@ -281,9 +291,22 @@ void DX9MapEditor::MainLoop()
 	// Draw left child
 	ms_BaseLeft->BeginRender();
 
-	if (m_Image)
+	if (ms_Map)
 	{
-		m_Image->Draw();
+		if (ms_Map->GetMode() == MapMode::TileMode)
+		{
+			if (ms_TileImage)
+			{
+				ms_TileImage->Draw();
+			}
+		}
+		else
+		{
+			if (ms_MoveImage)
+			{
+				ms_MoveImage->Draw();
+			}
+		}
 	}
 
 	ms_BaseLeft->EndRender();
@@ -291,11 +314,11 @@ void DX9MapEditor::MainLoop()
 	// Draw right child
 	ms_BaseRight->BeginRender();
 	
-	if (m_Map)
+	if (ms_Map)
 	{
 		D3DXVECTOR2 mapOffset = D3DXVECTOR2(0, 0);
-		m_Map->SetGlobalPosition(-mapOffset);
-		m_Map->Draw();
+		ms_Map->SetGlobalPosition(-mapOffset);
+		ms_Map->Draw();
 	}
 
 	ms_BaseRight->EndRender();
@@ -303,21 +326,10 @@ void DX9MapEditor::MainLoop()
 
 void DX9MapEditor::Destroy()
 {
-	m_Map->Destroy();
-	m_Image->Destroy();
-	ms_BaseLeft->Destroy();
-	ms_BaseRight->Destroy();
-	ms_BaseParent->Destroy();
-
-	delete m_Map;
-	delete m_Image;
-	delete ms_BaseLeft;
-	delete ms_BaseRight;
-	delete ms_BaseParent;
-
-	m_Map = nullptr;
-	m_Image = nullptr;
-	ms_BaseLeft = nullptr;
-	ms_BaseRight = nullptr;
-	ms_BaseParent = nullptr;
+	DX_DESTROY(ms_Map);
+	DX_DESTROY(ms_TileImage);
+	DX_DESTROY(ms_MoveImage);
+	DX_DESTROY(ms_BaseLeft);
+	DX_DESTROY(ms_BaseRight);
+	DX_DESTROY(ms_BaseParent);
 }

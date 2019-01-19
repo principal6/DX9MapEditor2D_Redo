@@ -16,8 +16,6 @@ int main()
 	if (DX_FAILED(g_MapEditor.Create(800, 600)))
 		return -1;
 
-	g_MapEditor.LoadMap(L"map01.jwm");
-
 	g_MapEditor.Run();
 
 	return 0;
