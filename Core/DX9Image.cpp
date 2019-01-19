@@ -313,12 +313,12 @@ void DX9Image::UpdateVertexData()
 
 	m_Vertices[0].x = m_Position.x;
 	m_Vertices[0].y = m_Position.y;
-	m_Vertices[1].x = m_Position.x + tW * m_Scale.x;
+	m_Vertices[1].x = m_Position.x + static_cast<float>(tW) * m_Scale.x;
 	m_Vertices[1].y = m_Position.y;
 	m_Vertices[2].x = m_Position.x;
-	m_Vertices[2].y = m_Position.y + tH * m_Scale.y;
-	m_Vertices[3].x = m_Position.x + tW * m_Scale.x;
-	m_Vertices[3].y = m_Position.y + tH * m_Scale.y;
+	m_Vertices[2].y = m_Position.y + static_cast<float>(tH) * m_Scale.y;
+	m_Vertices[3].x = m_Position.x + static_cast<float>(tW) * m_Scale.x;
+	m_Vertices[3].y = m_Position.y + static_cast<float>(tH) * m_Scale.y;
 
 	UpdateVertexBuffer();
 }

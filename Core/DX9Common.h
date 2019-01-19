@@ -171,4 +171,3 @@ namespace DX9ENGINE
 		virtual auto DX9Common::GethWnd() const->HWND;
 	};
 };
-
