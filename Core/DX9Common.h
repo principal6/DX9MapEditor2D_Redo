@@ -38,9 +38,10 @@ namespace DX9ENGINE
 
 	using CINT = const int;
 
+	static constexpr int MAX_FILE_LEN = 260;
+
 	struct WindowData
 	{
-		static const int MAX_FILE_LEN = 260;
 		int WindowWidth;
 		int WindowHeight;
 		float WindowHalfWidth;

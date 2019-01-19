@@ -127,7 +127,7 @@ LRESULT CALLBACK RightChildWindowProc(HWND hWnd, UINT Message, WPARAM wParam, LP
 
 LRESULT CALLBACK DX9ENGINE::DlgProcNewMap(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
-	wchar_t tWC[255] {};
+	wchar_t tWC[MAX_FILE_LEN] {};
 	WSTRING tStr;
 
 	WSTRING Combobox_Ratio[] = { L"x32", L"x64" };
@@ -162,17 +162,17 @@ LRESULT CALLBACK DX9ENGINE::DlgProcNewMap(HWND hDlg, UINT iMessage, WPARAM wPara
 			}
 			break;
 		case IDOK:
-			GetDlgItemText(hDlg, IDC_EDIT4, tWC, 255);
+			GetDlgItemText(hDlg, IDC_EDIT4, tWC, MAX_FILE_LEN);
 
 			if (wcslen(tWC))
 			{
-				GetDlgItemText(hDlg, IDC_EDIT1, tWC, 255);
+				GetDlgItemText(hDlg, IDC_EDIT1, tWC, MAX_FILE_LEN);
 				DX9MapEditor::ms_MapInfo.MapName = tWC;
 
 				DX9MapEditor::ms_MapInfo.MapCols = GetDlgItemInt(hDlg, IDC_EDIT2, FALSE, FALSE);
 				DX9MapEditor::ms_MapInfo.MapRows = GetDlgItemInt(hDlg, IDC_EDIT3, FALSE, FALSE);
 
-				GetDlgItemText(hDlg, IDC_COMBO1, tWC, 255);
+				GetDlgItemText(hDlg, IDC_COMBO1, tWC, MAX_FILE_LEN);
 				tStr = tWC;
 				tStr = tStr.substr(1);
 				DX9MapEditor::ms_MapInfo.TileSize = _wtoi(tStr.c_str());

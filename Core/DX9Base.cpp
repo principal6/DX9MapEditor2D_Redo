@@ -67,7 +67,7 @@ auto DX9Base::CreateChildWindow(HWND hWndParent, CINT X, CINT Y, CINT Width, CIN
 	m_BGColor = D3DCOLOR_XRGB(Color.Red, Color.Green, Color.Blue);
 
 	WSTRING Name = L"EditorChild";
-	wchar_t temp[WindowData::MAX_FILE_LEN] {};
+	wchar_t temp[MAX_FILE_LEN] {};
 	_itow_s(ms_ChildWindowCount, temp, 10);
 	Name += temp;
 
