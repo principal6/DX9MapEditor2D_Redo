@@ -3,10 +3,11 @@
 #include "resource.h"
 #include "Core/DX9Base.h"
 #include "DX9Map.h"
+#include "DX9TileSelector.h"
 
 namespace DX9ENGINE
 {
-	class DX9MapEditor final : public DX9Common
+	class DX9MapEditor final
 	{
 	private:
 		static const int WINDOW_X = 50;
@@ -22,17 +23,25 @@ namespace DX9ENGINE
 		static DX9Base* ms_BaseRight;
 		static RECT ms_TempRect;
 		static MapInfo ms_MapInfo;
-		static DX9Image* ms_TileImage;
-		static DX9Image* ms_MoveImage;
+
+		// Base left
+		static UNIQUE_PTR<DX9Image> ms_TileImage;
+		static UNIQUE_PTR<DX9Image> ms_MoveImage;
+		static UNIQUE_PTR<DX9TileSelector> ms_TileSelector;
+
+		// Base right
 		static DX9Map* ms_Map;
 
+		wchar_t m_BaseDir[MAX_FILE_LEN];
 		bool m_Keys[NUM_KEYS];
+		HWND m_hWndMain;
 		MSG m_MSG;
 		HACCEL m_hAccel;
 
 	private:
-		void DX9MapEditor::Destroy() override;
+		void DX9MapEditor::Destroy();
 
+		static void LoadTileWindowImages();
 		friend RECT GetLeftChildWindowPositionAndSize(RECT Rect);
 		friend RECT GetRightChildWindowPositionAndSize(RECT Rect);
 		friend LRESULT CALLBACK ParentWindowProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);

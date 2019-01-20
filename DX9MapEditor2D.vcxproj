@@ -162,16 +162,17 @@
     <ClInclude Include="Core\DX9Line.h" />
     <ClInclude Include="DX9MapEditor.h" />
     <ClInclude Include="DX9Map.h" />
+    <ClInclude Include="DX9TileSelector.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\DX9Base.cpp" />
-    <ClCompile Include="Core\DX9Common.cpp" />
     <ClCompile Include="Core\DX9Image.cpp" />
     <ClCompile Include="Core\DX9Input.cpp" />
     <ClCompile Include="Core\DX9Line.cpp" />
     <ClCompile Include="DX9MapEditor.cpp" />
     <ClCompile Include="DX9Map.cpp" />
+    <ClCompile Include="DX9TileSelector.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>

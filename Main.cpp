@@ -11,12 +11,12 @@ int main()
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-	static DX9MapEditor g_MapEditor;
+	static DX9MapEditor myMapEditor;
 
-	if (DX_FAILED(g_MapEditor.Create(800, 600)))
-		return -1;
-
-	g_MapEditor.Run();
+	if (DX_SUCCEEDED(myMapEditor.Create(800, 600)))
+	{
+		myMapEditor.Run();
+	}	
 
 	return 0;
 }

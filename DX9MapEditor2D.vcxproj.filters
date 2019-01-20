@@ -7,9 +7,6 @@
     <ClCompile Include="Core\DX9Base.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Core\DX9Common.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="Core\DX9Image.cpp">
       <Filter>Core</Filter>
     </ClCompile>
@@ -19,6 +16,7 @@
     <ClCompile Include="Core\DX9Line.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="DX9TileSelector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DX9MapEditor.h" />
@@ -41,6 +39,7 @@
     <ClInclude Include="resource.h">
       <Filter>리소스</Filter>
     </ClInclude>
+    <ClInclude Include="DX9TileSelector.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
