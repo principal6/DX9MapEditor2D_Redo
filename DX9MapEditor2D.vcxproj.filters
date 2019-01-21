@@ -2,11 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="DX9MapEditor.cpp" />
-    <ClCompile Include="DX9Map.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Core\DX9Base.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="Core\DX9Image.cpp">
       <Filter>Core</Filter>
     </ClCompile>
@@ -17,13 +13,15 @@
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="DX9TileSelector.cpp" />
+    <ClCompile Include="Core\DX9Window.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\DX9Map.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DX9MapEditor.h" />
-    <ClInclude Include="DX9Map.h" />
-    <ClInclude Include="Core\DX9Base.h">
-      <Filter>Core</Filter>
-    </ClInclude>
     <ClInclude Include="Core\DX9Common.h">
       <Filter>Core</Filter>
     </ClInclude>
@@ -40,6 +38,12 @@
       <Filter>리소스</Filter>
     </ClInclude>
     <ClInclude Include="DX9TileSelector.h" />
+    <ClInclude Include="Core\DX9Window.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\DX9Map.h">
+      <Filter>Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
@@ -47,6 +51,9 @@
     </Filter>
     <Filter Include="리소스">
       <UniqueIdentifier>{4ee979aa-f146-4ba6-ac02-99627c41a066}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game">
+      <UniqueIdentifier>{441d84d4-5879-40db-b2aa-f42f8ebd5f96}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

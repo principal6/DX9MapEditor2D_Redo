@@ -1,8 +1,8 @@
 #pragma once
 
 #include "resource.h"
-#include "Core/DX9Base.h"
-#include "DX9Map.h"
+#include "Core/DX9Window.h"
+#include "Game/DX9Map.h"
 #include "DX9TileSelector.h"
 
 namespace DX9ENGINE
@@ -18,11 +18,11 @@ namespace DX9ENGINE
 		static const int WINDOW_HSCROLL_SIZE = 15;
 		static const int WINDOW_PADDING_X = 10;
 
-		static DX9Base* ms_BaseParent;
-		static DX9Base* ms_BaseLeft;
-		static DX9Base* ms_BaseRight;
+		static DX9Window* ms_BaseParent;
+		static DX9Window* ms_BaseLeft;
+		static DX9Window* ms_BaseRight;
 		static RECT ms_TempRect;
-		static MapInfo ms_MapInfo;
+		static SMapInfo ms_MapInfo;
 
 		// Base left
 		static UNIQUE_PTR<DX9Image> ms_TileImage;
@@ -51,7 +51,7 @@ namespace DX9ENGINE
 		DX9MapEditor() {};
 		~DX9MapEditor() {};
 
-		auto DX9MapEditor::Create(int Width, int Height)->Error;
+		auto DX9MapEditor::Create(int Width, int Height)->EError;
 
 		void DX9MapEditor::Run();
 

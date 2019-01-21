@@ -3,11 +3,11 @@
 
 using namespace DX9ENGINE;
 
-DX9Base* DX9MapEditor::ms_BaseParent;
-DX9Base* DX9MapEditor::ms_BaseLeft;
-DX9Base* DX9MapEditor::ms_BaseRight;
+DX9Window* DX9MapEditor::ms_BaseParent;
+DX9Window* DX9MapEditor::ms_BaseLeft;
+DX9Window* DX9MapEditor::ms_BaseRight;
 RECT DX9MapEditor::ms_TempRect;
-MapInfo DX9MapEditor::ms_MapInfo;
+SMapInfo DX9MapEditor::ms_MapInfo;
 
 // Base left
 UNIQUE_PTR<DX9Image> DX9MapEditor::ms_TileImage;
@@ -38,7 +38,7 @@ void DX9MapEditor::LoadTileWindowImages()
 	ms_Map->GetMapInfo(&ms_MapInfo);
 	ms_TileImage->SetTexture(ms_MapInfo.TileName);
 	ms_MoveImage->SetTexture(ms_MapInfo.MoveName);
-	ms_TileSelector->SetSize(ms_MapInfo.TileSize);
+	ms_TileSelector->SetSize(static_cast<float>(ms_MapInfo.TileSize));
 }
 
 LRESULT CALLBACK DX9ENGINE::ParentWindowProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
@@ -74,11 +74,11 @@ LRESULT CALLBACK DX9ENGINE::ParentWindowProc(HWND hWnd, UINT Message, WPARAM wPa
 			break;
 		case ID_ACCELERATOR40008: // ACCEL F2
 		case ID_MODE_TILEMODE:
-			DX9MapEditor::ms_Map->SetMode(MapMode::TileMode);
+			DX9MapEditor::ms_Map->SetMode(EMapMode::TileMode);
 			break;
 		case ID_ACCELERATOR40010: // ACCEL F3
 		case ID_MODE_MOVEMODE:
-			DX9MapEditor::ms_Map->SetMode(MapMode::MoveMode);
+			DX9MapEditor::ms_Map->SetMode(EMapMode::MoveMode);
 			break;
 		case ID_ACCELERATOR40017: // ACCEL F1
 		case ID_HELP_INFO:
@@ -216,18 +216,18 @@ LRESULT CALLBACK DX9ENGINE::DlgProcNewMap(HWND hDlg, UINT iMessage, WPARAM wPara
 	return FALSE;
 }
 
-auto DX9MapEditor::Create(int Width, int Height)->Error
+auto DX9MapEditor::Create(int Width, int Height)->EError
 {
 	// Set base directory
 	memset(m_BaseDir, 0, sizeof(m_BaseDir));
 	GetCurrentDirectoryW(MAX_FILE_LEN, m_BaseDir);
 
 	// Create parent window
-	if (ms_BaseParent = new DX9Base)
+	if (ms_BaseParent = new DX9Window)
 	{
 		if (DX_FAILED(ms_BaseParent->CreateParentWindow(WINDOW_X, WINDOW_Y, Width, Height,
 			D3DCOLOR_XRGB(50, 50, 80), ParentWindowProc, MAKEINTRESOURCE(IDR_MENU1))))
-			return Error::BASE_NOT_CREATED;
+			return EError::WINDOW_NOT_CREATED;
 
 		// Set main window handle
 		m_hWndMain = ms_BaseParent->GethWnd();
@@ -237,53 +237,53 @@ auto DX9MapEditor::Create(int Width, int Height)->Error
 	m_hAccel = LoadAccelerators(nullptr, MAKEINTRESOURCE(IDR_ACCELERATOR1));
 
 	// Create left child base and initialize Direct3D9
-	if (ms_BaseLeft = new DX9Base)
+	if (ms_BaseLeft = new DX9Window)
 	{
 		// Get main window RECT
 		GetClientRect(m_hWndMain, &ms_TempRect);
 		ms_TempRect = GetLeftChildWindowPositionAndSize(ms_TempRect);
 		if (DX_FAILED(ms_BaseLeft->CreateChildWindow(m_hWndMain, ms_TempRect.left, ms_TempRect.top, ms_TempRect.right, ms_TempRect.bottom,
 			D3DCOLOR_XRGB(160, 160, 160), LeftChildWindowProc)))
-			return Error::BASE_NOT_CREATED;
+			return EError::WINDOW_NOT_CREATED;
 	}
 
 	// Create image objects
 	if (ms_TileImage = MAKE_UNIQUE(DX9Image)())
 	{
 		if (DX_FAILED(ms_TileImage->Create(ms_BaseLeft, m_BaseDir)))
-			return Error::IMAGE_NOT_CREATED;
-		ms_TileImage->SetSize(0, 0);
+			return EError::IMAGE_NOT_CREATED;
+		ms_TileImage->SetSize(D3DXVECTOR2(0, 0));
 	}
 	if (ms_MoveImage = MAKE_UNIQUE(DX9Image)())
 	{
 		if (DX_FAILED(ms_MoveImage->Create(ms_BaseLeft, m_BaseDir)))
-			return Error::IMAGE_NOT_CREATED;
+			return EError::IMAGE_NOT_CREATED;
 	}
 	if (ms_TileSelector = MAKE_UNIQUE(DX9TileSelector)())
 	{
 		if (DX_FAILED(ms_TileSelector->Create(ms_BaseLeft, m_BaseDir)))
-			return Error::TILESELECTOR_NOT_CREATED;
+			return EError::TILESELECTOR_NOT_CREATED;
 	}
 
 	// Create right child base and initialize Direct3D9
-	if (ms_BaseRight = new DX9Base)
+	if (ms_BaseRight = new DX9Window)
 	{
 		// Get main window RECT
 		GetClientRect(m_hWndMain, &ms_TempRect);
 		ms_TempRect = GetRightChildWindowPositionAndSize(ms_TempRect);
 		if (DX_FAILED(ms_BaseRight->CreateChildWindow(m_hWndMain, ms_TempRect.left, ms_TempRect.top, ms_TempRect.right, ms_TempRect.bottom,
 			D3DCOLOR_XRGB(200, 200, 200), RightChildWindowProc)))
-			return Error::BASE_NOT_CREATED;
+			return EError::WINDOW_NOT_CREATED;
 	}
 	
 	// Create map object
 	if (ms_Map = new DX9Map)
 	{
 		if (DX_FAILED(ms_Map->Create(ms_BaseRight, m_BaseDir)))
-			return Error::MAP_NOT_CREATED;
+			return EError::MAP_NOT_CREATED;
 	}
 
-	return Error::OK;
+	return EError::OK;
 }
 
 void DX9MapEditor::Run()
@@ -327,7 +327,7 @@ void DX9MapEditor::MainLoop()
 	ms_BaseLeft->BeginRender();
 	if (ms_Map)
 	{
-		if (ms_Map->GetMode() == MapMode::TileMode)
+		if (ms_Map->GetMode() == EMapMode::TileMode)
 		{
 			if (ms_TileImage)
 			{

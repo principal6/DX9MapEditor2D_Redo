@@ -6,7 +6,7 @@ namespace DX9ENGINE
 {
 	// ***
 	// *** Forward declaration ***
-	class DX9Base;
+	class DX9Window;
 	// ***
 
 	class DX9TileSelector final
@@ -21,11 +21,11 @@ namespace DX9ENGINE
 		DX9TileSelector() {};
 		~DX9TileSelector() {};
 
-		auto Create(DX9Base* pBase, WSTRING BaseDir)->Error;
+		auto Create(DX9Window* pBase, WSTRING BaseDir)->EError;
 		void Destroy();
 
 		void Draw();
 
-		void SetSize(int TileSize);
+		void SetSize(float TileSize);
 	};
 };
