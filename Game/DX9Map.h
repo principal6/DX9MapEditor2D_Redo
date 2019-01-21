@@ -70,7 +70,9 @@ namespace DX9ENGINE
 		void DX9Map::SetPosition(D3DXVECTOR2 Offset);
 		void DX9Map::SetMapFragmentTile(int TileID, int X, int Y);
 		void DX9Map::SetMapFragmentMove(int MoveID, int X, int Y);
-		void DX9Map::SetGlobalPosition(D3DXVECTOR2 Offset); // For map movement
+
+		// Global position for map movement in game (Position's Y value inversed)
+		void DX9Map::SetGlobalPosition(D3DXVECTOR2 Offset);
 
 		auto DX9Map::IsMapCreated() const->bool;
 		auto DX9Map::GetMode() const->EMapMode;

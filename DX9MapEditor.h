@@ -18,19 +18,22 @@ namespace DX9ENGINE
 		static const int WINDOW_HSCROLL_SIZE = 15;
 		static const int WINDOW_PADDING_X = 10;
 
-		static DX9Window* ms_BaseParent;
-		static DX9Window* ms_BaseLeft;
-		static DX9Window* ms_BaseRight;
+		static DX9Window* ms_WindowParent;
+		static DX9Window* ms_WindowLeft;
+		static DX9Window* ms_WindowRight;
 		static RECT ms_TempRect;
 		static SMapInfo ms_MapInfo;
 
-		// Base left
+		// For left child window
 		static UNIQUE_PTR<DX9Image> ms_TileImage;
 		static UNIQUE_PTR<DX9Image> ms_MoveImage;
-		static UNIQUE_PTR<DX9TileSelector> ms_TileSelector;
-
-		// Base right
+		
+		// For right child window
+		static UNIQUE_PTR<DX9Image> ms_MapBG;
 		static DX9Map* ms_Map;
+
+		// For both child windows
+		static UNIQUE_PTR<DX9MapTileSelector> ms_MapTileSelector;
 
 		wchar_t m_BaseDir[MAX_FILE_LEN];
 		bool m_Keys[NUM_KEYS];
@@ -42,9 +45,11 @@ namespace DX9ENGINE
 		void DX9MapEditor::Destroy();
 
 		static void LoadTileWindowImages();
-		friend RECT GetLeftChildWindowPositionAndSize(RECT Rect);
-		friend RECT GetRightChildWindowPositionAndSize(RECT Rect);
+		friend RECT GetLeftChildPositionAndSizeFromParent(RECT Rect);
+		friend RECT GetRightChildPositionAndSizeFromParent(RECT Rect);
 		friend LRESULT CALLBACK ParentWindowProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
+		friend LRESULT CALLBACK LeftChildWindowProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
+		friend LRESULT CALLBACK RightChildWindowProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
 		friend LRESULT CALLBACK DlgProcNewMap(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
 	public:

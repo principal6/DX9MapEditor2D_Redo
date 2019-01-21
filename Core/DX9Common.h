@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <Windows.h>
+#include <windowsx.h>
 #include <d3dx9.h>
 #include <cassert>
 #include <vector>
@@ -84,6 +85,7 @@ namespace DX9ENGINE
 		NULLPTR_DEVICE,
 		NULLPTR_MAP,
 		NULLPTR_BASE,
+		NULLPTR_MAP_INFO,
 	};
 
 	struct STextureUV
@@ -112,7 +114,17 @@ namespace DX9ENGINE
 		*TileRows = static_cast<int>(SheetHeight / TileHeight);
 	}
 
+	inline void SetColorAlpha(DWORD* Color, BYTE Alpha)
+	{
+		*Color = (Alpha << 24) | ((*Color << 8) >> 8);
+	}
+	inline void SetColorXRGB(DWORD* Color, DWORD XRGB)
+	{
+		*Color = ((*Color >> 24) << 24) | ((XRGB << 8) >> 8);
+	}
 	inline auto GetColorR(DWORD Color)->BYTE { return ((Color << 8) >> 24); }
 	inline auto GetColorG(DWORD Color)->BYTE { return ((Color << 16) >> 24); }
 	inline auto GetColorB(DWORD Color)->BYTE { return ((Color << 24) >> 24); }
+	inline auto GetColorAlpha(DWORD Color)->BYTE { return (Color >> 24); }
+	inline auto GetColorXRGB(DWORD Color)->DWORD { return ((Color << 8) >> 8); }
 };

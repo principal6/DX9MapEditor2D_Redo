@@ -83,14 +83,14 @@ DX9Map::DX9Map()
 	m_bMapCreated = false;
 
 	m_MapInfo.TileSize = DEF_TILE_SIZE;
-	m_MapInfo.TileSheetSize = D3DXVECTOR2(0.0f, 0.0f);
-	m_MapInfo.MoveSheetSize = D3DXVECTOR2(0.0f, 0.0f);
+	m_MapInfo.TileSheetSize = D3DXVECTOR2(0, 0);
+	m_MapInfo.MoveSheetSize = D3DXVECTOR2(0, 0);
 
 	m_bMoveTextureLoaded = false;
 	m_pTextureMove = nullptr;
 	m_pVBMove = nullptr;
 
-	m_Offset = D3DXVECTOR2(0.0f, 0.0f);
+	m_Offset = D3DXVECTOR2(0, 0);
 	m_OffsetZeroY = 0;
 }
 
@@ -414,7 +414,7 @@ void DX9Map::ParseMapData(WSTRING Str)
 
 auto DX9Map::GetMapTileBoundary(int MapID, EMapDirection Dir) const->float
 {
-	float Result = 0.0f;
+	float Result = 0;
 
 	D3DXVECTOR2 tMapXY = ConvertIDToXY(MapID, m_MapInfo.MapCols);
 
@@ -499,8 +499,8 @@ void DX9Map::SetMode(EMapMode Mode)
 void DX9Map::SetPosition(D3DXVECTOR2 Offset)
 {
 	int VertID0 = 0;
-	float tX = 0.0f;
-	float tY = 0.0f;
+	float tX = 0;
+	float tY = 0;
 
 	m_Offset = Offset;
 
@@ -807,8 +807,8 @@ auto DX9Map::GetVelocityAfterCollision(SBoundingBox BB, D3DXVECTOR2 Velocity) co
 	int tXE = static_cast<int>(tMapXYE.x);
 	int tYE = static_cast<int>(tMapXYE.y);
 
-	float fWall = 0.0f;
-	float fWallCmp = 0.0f;
+	float fWall = 0;
+	float fWallCmp = 0;
 
 	int tMapID = 0;
 

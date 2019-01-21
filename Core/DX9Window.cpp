@@ -21,6 +21,37 @@ LRESULT CALLBACK GameWindowProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM l
 	return(DefWindowProc(hWnd, Message, wParam, lParam));
 }
 
+// Window procedure for Editor Window
+void DX9Window::EditorChildWindowMessageHandler(UINT Message, WPARAM wParam, LPARAM lParam)
+{
+	switch (Message)
+	{
+	case WM_LBUTTONDOWN:
+		if (!m_MouseData.bMouseLeftButtonPressed)
+		{
+			m_MouseData.MouseDownPosition.x = GET_X_LPARAM(lParam);
+			m_MouseData.MouseDownPosition.y = GET_Y_LPARAM(lParam);
+
+			m_MouseData.bMouseLeftButtonPressed = true;
+		}
+		break;
+
+	case WM_MOUSEMOVE:
+		m_MouseData.MousePosition.x = GET_X_LPARAM(lParam);
+		m_MouseData.MousePosition.y = GET_Y_LPARAM(lParam);
+		break;
+
+	case WM_LBUTTONUP:
+		m_MouseData.bMouseLeftButtonPressed = false;
+		break;
+	}
+}
+
+auto DX9Window::IsMousePressed()->bool
+{
+	return m_MouseData.bMouseLeftButtonPressed;
+}
+
 DX9Window::DX9Window()
 {
 	m_hInstance = nullptr;
@@ -196,10 +227,13 @@ auto DX9Window::GetWindowData()->SWindowData*
 	return &m_WindowData;
 }
 
+auto DX9Window::GetMouseData()->SMouseData*
+{
+	return &m_MouseData;
+}
 
-//
-// Dialog functions
-//
+
+/** Dialog functions */
 void DX9Window::SetDlgBase()
 {
 	ZeroMemory(&m_OFN, sizeof(m_OFN));
