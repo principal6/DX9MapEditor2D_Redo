@@ -15,7 +15,7 @@ UNIQUE_PTR<DX9Image> DX9MapEditor::ms_MapBG;
 DX9Map* DX9MapEditor::ms_Map;
 UNIQUE_PTR<DX9MapTileSelector> DX9MapEditor::ms_MapTileSelector;
 
-RECT DX9ENGINE::GetLeftChildPositionAndSizeFromParent(RECT Rect)
+auto DX9ENGINE::GetLeftChildPositionAndSizeFromParent(RECT Rect)->RECT
 {
 	RECT Result = {0, 0,
 		DX9MapEditor::WINDOW_SEPERATE_X - DX9MapEditor::WINDOW_VSCROLL_SIZE,
@@ -23,7 +23,7 @@ RECT DX9ENGINE::GetLeftChildPositionAndSizeFromParent(RECT Rect)
 	return Result;
 }
 
-RECT DX9ENGINE::GetRightChildPositionAndSizeFromParent(RECT Rect)
+auto DX9ENGINE::GetRightChildPositionAndSizeFromParent(RECT Rect)->RECT
 {
 	RECT Result = { DX9MapEditor::WINDOW_SEPERATE_X + DX9MapEditor::WINDOW_SEPERATE_INTERVAL, 0,
 		Rect.right - DX9MapEditor::WINDOW_SEPERATE_X - DX9MapEditor::WINDOW_VSCROLL_SIZE - DX9MapEditor::WINDOW_PADDING_X,
@@ -31,11 +31,38 @@ RECT DX9ENGINE::GetRightChildPositionAndSizeFromParent(RECT Rect)
 	return Result;
 }
 
+
+
+void DX9MapEditor::SetMapEditorCaption()
+{
+	WSTRING tempCaption = MAP_EDITOR_NAME;
+	tempCaption += L" - MAP=\"";
+	tempCaption += ms_MapInfo.MapName;
+	tempCaption += L"\" (";
+	tempCaption += ConvertIntToWSTRING(ms_MapInfo.MapCols);
+	tempCaption += L"*";
+	tempCaption += ConvertIntToWSTRING(ms_MapInfo.MapRows);
+	tempCaption += L")   TILE=\"";
+	tempCaption += ms_MapInfo.TileSheetName;
+	tempCaption += L"\" (";
+	tempCaption += ConvertIntToWSTRING(ms_MapInfo.TileSheetCols);
+	tempCaption += L"*";
+	tempCaption += ConvertIntToWSTRING(ms_MapInfo.TileSheetRows);
+	tempCaption += L")";
+
+	tempCaption += L"   MOUSE= ";
+	tempCaption += ConvertIntToWSTRING(ms_MapTileSelector->GetMapSelectorPositionInCells().x);
+	tempCaption += L" / ";
+	tempCaption += ConvertIntToWSTRING(ms_MapTileSelector->GetMapSelectorPositionInCells().y);
+
+	ms_WindowParent->SetWindowCaption(tempCaption);
+}
+
 void DX9MapEditor::LoadTileWindowImages()
 {
 	ms_Map->GetMapInfo(&ms_MapInfo);
-	ms_TileImage->SetTexture(ms_MapInfo.TileName);
-	ms_MoveImage->SetTexture(ms_MapInfo.MoveName);
+	ms_TileImage->SetTexture(ms_MapInfo.TileSheetName);
+	ms_MoveImage->SetTexture(ms_MapInfo.MoveSheetName);
 	ms_MapTileSelector->SetMapInfo(&ms_MapInfo);
 
 	ms_MapBG->SetSize(ms_MapInfo.MapSize);
@@ -66,6 +93,9 @@ LRESULT CALLBACK DX9ENGINE::ParentWindowProc(HWND hWnd, UINT Message, WPARAM wPa
 
 					// Load tile images
 					DX9MapEditor::LoadTileWindowImages();
+
+					// Set editor caption
+					DX9MapEditor::SetMapEditorCaption();
 				}
 			}
 			break;
@@ -137,6 +167,9 @@ LRESULT CALLBACK DX9ENGINE::RightChildWindowProc(HWND hWnd, UINT Message, WPARAM
 	if (DX9MapEditor::ms_MapTileSelector)
 	{
 		DX9MapEditor::ms_MapTileSelector->UpdateMapSelector(DX9MapEditor::ms_WindowRight->GetMouseData());
+
+		// Set editor caption (for mouse position change)
+		DX9MapEditor::SetMapEditorCaption();
 	}
 
 	return(DefWindowProc(hWnd, Message, wParam, lParam));
@@ -177,8 +210,8 @@ LRESULT CALLBACK DX9ENGINE::DlgProcNewMap(HWND hDlg, UINT iMessage, WPARAM wPara
 			if (DX9MapEditor::ms_WindowParent->OpenFileDlg(L"All files\0*.*\0"))
 			{
 				// Get the name of the tile
-				DX9MapEditor::ms_MapInfo.TileName = DX9MapEditor::ms_WindowParent->GetDlgFileTitle();
-				SetWindowText(GetDlgItem(hDlg, IDC_EDIT4), DX9MapEditor::ms_MapInfo.TileName.c_str());
+				DX9MapEditor::ms_MapInfo.TileSheetName = DX9MapEditor::ms_WindowParent->GetDlgFileTitle();
+				SetWindowText(GetDlgItem(hDlg, IDC_EDIT4), DX9MapEditor::ms_MapInfo.TileSheetName.c_str());
 			}
 			break;
 		case IDOK:
@@ -207,6 +240,9 @@ LRESULT CALLBACK DX9ENGINE::DlgProcNewMap(HWND hDlg, UINT iMessage, WPARAM wPara
 
 					// Load tile images
 					DX9MapEditor::LoadTileWindowImages();
+
+					// Set editor caption
+					DX9MapEditor::SetMapEditorCaption();
 				}
 			}
 		case IDCANCEL:
@@ -233,6 +269,9 @@ auto DX9MapEditor::Create(int Width, int Height)->EError
 
 		// Set main window handle
 		m_hWndMain = ms_WindowParent->GethWnd();
+
+		// Set main window caption
+		ms_WindowParent->SetWindowCaption(MAP_EDITOR_NAME);
 	}
 
 	// Load accelerator

@@ -64,6 +64,7 @@ namespace DX9ENGINE
 			DWORD Color, WNDPROC Proc)->EError;
 		void DX9Window::Destroy();
 
+		void DX9Window::SetWindowCaption(WSTRING Caption);
 		void DX9Window::SetBackgroundColor(D3DCOLOR color);
 		void DX9Window::Resize();
 

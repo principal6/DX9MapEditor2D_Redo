@@ -15,6 +15,9 @@ auto DX9MapTileSelector::ConvertPositionToCellXY(POINT Position)->POINT
 	{
 		Result.x = (static_cast<int>(Position.x) / m_pMapInfo->TileSize);
 		Result.y = (static_cast<int>(Position.y) / m_pMapInfo->TileSize);
+
+		Result.x = max(Result.x, 0);
+		Result.y = max(Result.y, 0);
 	}
 
 	return Result;
@@ -65,6 +68,18 @@ void DX9MapTileSelector::UpdateTileSelector(SMouseData* MouseData)
 			POINT PositionInCells = ConvertPositionToCellXY(MouseData->MousePosition);
 			POINT DownPositionInCells = ConvertPositionToCellXY(MouseData->MouseDownPosition);
 
+			// @warning:
+			// We do not restrict the tilesheet's max selection range
+			// because normally the texture file width and height are bigger than the tilesheet itself
+			// fot a better precision in DirectX9 texture.
+			// *** The texture size must be 2^n (e.g. 256*512, 1024*128)
+			/*
+			PositionInCells.x = min(PositionInCells.x, m_pMapInfo->TileSheetCols);
+			PositionInCells.y = min(PositionInCells.y, m_pMapInfo->TileSheetRows);
+			DownPositionInCells.x = min(DownPositionInCells.x, m_pMapInfo->TileSheetCols);
+			DownPositionInCells.y = min(DownPositionInCells.y, m_pMapInfo->TileSheetRows);
+			*/
+
 			m_SelectionSize.x = abs(DownPositionInCells.x - PositionInCells.x);
 			m_SelectionSize.y = abs(DownPositionInCells.y - PositionInCells.y);
 
@@ -102,11 +117,16 @@ void DX9MapTileSelector::UpdateMapSelector(SMouseData* MouseData)
 {
 	if (m_pMapInfo)
 	{
-		POINT PositionInCells = ConvertPositionToCellXY(MouseData->MousePosition);
+		m_MapSelectorPositionInCells = ConvertPositionToCellXY(MouseData->MousePosition);
+
+		// @warning
+		// Restrict position in cells IAW map's max rows and cols
+		m_MapSelectorPositionInCells.x = min(m_MapSelectorPositionInCells.x, m_pMapInfo->MapCols - 1);
+		m_MapSelectorPositionInCells.y = min(m_MapSelectorPositionInCells.y, m_pMapInfo->MapRows - 1);
 
 		D3DXVECTOR2 NewPosition;
-		NewPosition.x = static_cast<float>(PositionInCells.x * m_pMapInfo->TileSize);
-		NewPosition.y = static_cast<float>(PositionInCells.y * m_pMapInfo->TileSize);
+		NewPosition.x = static_cast<float>(m_MapSelectorPositionInCells.x * m_pMapInfo->TileSize);
+		NewPosition.y = static_cast<float>(m_MapSelectorPositionInCells.y * m_pMapInfo->TileSize);
 
 		m_MapSelector->SetPosition(NewPosition);
 	}
@@ -127,7 +147,7 @@ auto DX9MapTileSelector::SetMapInfo(SMapInfo* pInfo)->EError
 		return EError::NULLPTR_MAP_INFO;
 
 	m_TileSelector->SetSize(D3DXVECTOR2(static_cast<float>(m_pMapInfo->TileSize), static_cast<float>(m_pMapInfo->TileSize)));
-	m_MapSelector->SetTexture(m_pMapInfo->TileName);
+	m_MapSelector->SetTexture(m_pMapInfo->TileSheetName);
 	
 	InitializeSelectorPositionAndSize();
 
@@ -143,4 +163,9 @@ void DX9MapTileSelector::InitializeSelectorPositionAndSize()
 		m_MapSelector->SetSize(m_TileSelector->GetSize());
 		m_MapSelector->SetAtlasUV(D3DXVECTOR2(0, 0), m_TileSelector->GetSize());
 	}
+}
+
+auto DX9MapTileSelector::GetMapSelectorPositionInCells()->POINT
+{
+	return m_MapSelectorPositionInCells;
 }

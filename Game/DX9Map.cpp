@@ -80,7 +80,7 @@ auto DX9Map::ConvertPositionToXY(D3DXVECTOR2 Position, D3DXVECTOR2 Offset, int T
 DX9Map::DX9Map()
 {
 	m_CurrMapMode = EMapMode::TileMode;
-	m_bMapCreated = false;
+	m_bMapExist = false;
 
 	m_MapInfo.TileSize = DEF_TILE_SIZE;
 	m_MapInfo.TileSheetSize = D3DXVECTOR2(0, 0);
@@ -134,7 +134,7 @@ void DX9Map::SetTileTexture(WSTRING FileName)
 
 	if ((m_Size.x) && (m_Size.y))
 	{
-		m_MapInfo.TileName = FileName;
+		m_MapInfo.TileSheetName = FileName;
 
 		m_MapInfo.TileSheetSize = m_Size; // 'm_Width = TileSheetWidth' after SetTexture() being called
 	}
@@ -158,7 +158,7 @@ void DX9Map::SetMoveTexture(WSTRING FileName)
 		D3DX_DEFAULT, D3DX_DEFAULT, 0, &tImageInfo, nullptr, &m_pTextureMove)))
 		return;
 
-	m_MapInfo.MoveName = FileName;
+	m_MapInfo.MoveSheetName = FileName;
 
 	m_MapInfo.MoveSheetSize.x = static_cast<float>(tImageInfo.Width);
 	m_MapInfo.MoveSheetSize.y = static_cast<float>(tImageInfo.Height);
@@ -205,7 +205,10 @@ void DX9Map::SaveMap(WSTRING FileName)
 	fileout.write(FileText.c_str(), FileText.size());
 }
 
-// @warning: This functions is called when a map is created or loaded
+// @warning
+// CreateMapBase() is called when a map is created or loaded
+// so if you want to set a generally-used data (e.g. SMapInfo)
+// for the map, do it here.
 void DX9Map::CreateMapBase()
 {
 	// Clear buffers
@@ -215,10 +218,14 @@ void DX9Map::CreateMapBase()
 	m_MapInfo.MapSize.x = static_cast<float>(m_MapInfo.MapCols * m_MapInfo.TileSize);
 	m_MapInfo.MapSize.y = static_cast<float>(m_MapInfo.MapRows * m_MapInfo.TileSize);
 
-	// Set tile texture of the map
-	SetTileTexture(m_MapInfo.TileName);
+	// Set tilesheet texture of the map
+	SetTileTexture(m_MapInfo.TileSheetName);
 
-	// Set move texture of the map
+	// Calculate tilesheet's cols and rows IAW the loaded tile texture size and the tile size
+	m_MapInfo.TileSheetCols = static_cast<int>(m_MapInfo.TileSheetSize.x) / m_MapInfo.TileSize;
+	m_MapInfo.TileSheetRows = static_cast<int>(m_MapInfo.TileSheetSize.y) / m_MapInfo.TileSize;
+
+	// Set movesheet texture of the map
 	switch (m_MapInfo.TileSize)
 	{
 	case 32:
@@ -339,7 +346,7 @@ void DX9Map::AddEnd()
 		UpdateVertexBufferMove();
 	}
 
-	m_bMapCreated = true;
+	m_bMapExist = true;
 	m_OffsetZeroY = m_pDX9Window->GetWindowData()->WindowHeight - (m_MapInfo.MapRows * m_MapInfo.TileSize);
 
 	SetGlobalPosition(D3DXVECTOR2(0, 0));
@@ -404,7 +411,7 @@ void DX9Map::ParseMapData(WSTRING Str)
 	tempFind = Str.find_first_of('#');
 	if (tempFind)
 	{
-		m_MapInfo.TileName = Str.substr(0, tempFind);
+		m_MapInfo.TileSheetName = Str.substr(0, tempFind);
 		Str = Str.substr(tempFind + 2);
 	}
 
@@ -662,7 +669,7 @@ void DX9Map::GetMapDataForSave(WSTRING *pStr) const
 	_itow_s(m_MapInfo.MapRows, tempWC, 10);
 	*pStr += tempWC;
 	*pStr += L'#';
-	*pStr += m_MapInfo.TileName;
+	*pStr += m_MapInfo.TileSheetName;
 	*pStr += L'#';
 	*pStr += L'\n';
 
@@ -730,9 +737,9 @@ void DX9Map::GetMapDataPartForSave(int DataID, wchar_t *WC, int size) const
 	wcscpy_s(WC, size, tempStr.c_str());
 }
 
-auto DX9Map::IsMapCreated() const->bool
+auto DX9Map::DoesMapExist() const->bool
 { 
-	return m_bMapCreated;
+	return m_bMapExist;
 };
 
 auto DX9Map::GetMode() const->EMapMode

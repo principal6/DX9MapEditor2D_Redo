@@ -7,6 +7,8 @@
 
 namespace DX9ENGINE
 {
+	const wchar_t MAP_EDITOR_NAME[]{ L"JW EDITOR [DirectX9 2D Game Map Editor] " };
+
 	class DX9MapEditor final
 	{
 	private:
@@ -45,8 +47,10 @@ namespace DX9ENGINE
 		void DX9MapEditor::Destroy();
 
 		static void LoadTileWindowImages();
-		friend RECT GetLeftChildPositionAndSizeFromParent(RECT Rect);
-		friend RECT GetRightChildPositionAndSizeFromParent(RECT Rect);
+		static void SetMapEditorCaption();
+
+		friend auto GetLeftChildPositionAndSizeFromParent(RECT Rect)->RECT;
+		friend auto GetRightChildPositionAndSizeFromParent(RECT Rect)->RECT;
 		friend LRESULT CALLBACK ParentWindowProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
 		friend LRESULT CALLBACK LeftChildWindowProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
 		friend LRESULT CALLBACK RightChildWindowProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);

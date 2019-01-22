@@ -181,6 +181,11 @@ void DX9Window::Destroy()
 	DX_RELEASE(m_pD3D);
 }
 
+void DX9Window::SetWindowCaption(WSTRING Caption)
+{
+	SetWindowTextW(m_hWnd, Caption.c_str());
+}
+
 void DX9Window::SetBackgroundColor(D3DCOLOR color)
 {
 	m_BGColor = color;

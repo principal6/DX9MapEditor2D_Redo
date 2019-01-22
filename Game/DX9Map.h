@@ -27,12 +27,14 @@ namespace DX9ENGINE
 	struct SMapInfo
 	{
 		WSTRING MapName;
-		WSTRING TileName;
-		WSTRING MoveName;
+		WSTRING TileSheetName;
+		WSTRING MoveSheetName;
 
 		int MapRows;
 		int MapCols;
 		int TileSize;
+		int TileSheetRows;
+		int TileSheetCols;
 		D3DXVECTOR2 MapSize;
 		D3DXVECTOR2 TileSheetSize;
 		D3DXVECTOR2 MoveSheetSize;
@@ -74,7 +76,7 @@ namespace DX9ENGINE
 		// Global position for map movement in game (Position's Y value inversed)
 		void DX9Map::SetGlobalPosition(D3DXVECTOR2 Offset);
 
-		auto DX9Map::IsMapCreated() const->bool;
+		auto DX9Map::DoesMapExist() const->bool;
 		auto DX9Map::GetMode() const->EMapMode;
 		void DX9Map::GetMapInfo(SMapInfo *pInfo) const;
 		auto DX9Map::GetMapOffset() const->D3DXVECTOR2;
@@ -118,7 +120,7 @@ namespace DX9ENGINE
 		static const wchar_t* MOVE_64;
 
 		EMapMode m_CurrMapMode; // For Map Editor
-		bool m_bMapCreated;
+		bool m_bMapExist;
 
 		SMapInfo m_MapInfo;
 		VECTOR<SMapData> m_MapData;

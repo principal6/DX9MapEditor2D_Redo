@@ -127,4 +127,12 @@ namespace DX9ENGINE
 	inline auto GetColorB(DWORD Color)->BYTE { return ((Color << 24) >> 24); }
 	inline auto GetColorAlpha(DWORD Color)->BYTE { return (Color >> 24); }
 	inline auto GetColorXRGB(DWORD Color)->DWORD { return ((Color << 8) >> 8); }
+	inline auto ConvertIntToWSTRING(int In)->WSTRING
+	{
+		WSTRING Result;
+		wchar_t temp[MAX_FILE_LEN]{};
+		_itow_s(In, temp, 10);
+		Result = temp;
+		return Result;
+	}
 };
