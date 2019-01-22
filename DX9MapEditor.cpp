@@ -36,24 +36,25 @@ auto DX9ENGINE::GetRightChildPositionAndSizeFromParent(RECT Rect)->RECT
 void DX9MapEditor::SetMapEditorCaption()
 {
 	WSTRING tempCaption = MAP_EDITOR_NAME;
-	tempCaption += L" - MAP=\"";
+	tempCaption += L"  <MAP=\"";
 	tempCaption += ms_MapInfo.MapName;
 	tempCaption += L"\" (";
 	tempCaption += ConvertIntToWSTRING(ms_MapInfo.MapCols);
 	tempCaption += L"*";
 	tempCaption += ConvertIntToWSTRING(ms_MapInfo.MapRows);
-	tempCaption += L")   TILE=\"";
+	tempCaption += L")>  <TILE=\"";
 	tempCaption += ms_MapInfo.TileSheetName;
 	tempCaption += L"\" (";
 	tempCaption += ConvertIntToWSTRING(ms_MapInfo.TileSheetCols);
 	tempCaption += L"*";
 	tempCaption += ConvertIntToWSTRING(ms_MapInfo.TileSheetRows);
-	tempCaption += L")";
+	tempCaption += L")>";
 
-	tempCaption += L"   MOUSE= ";
+	tempCaption += L"  <MOUSE= ";
 	tempCaption += ConvertIntToWSTRING(ms_MapTileSelector->GetMapSelectorPositionInCells().x);
 	tempCaption += L" / ";
 	tempCaption += ConvertIntToWSTRING(ms_MapTileSelector->GetMapSelectorPositionInCells().y);
+	tempCaption += L">";
 
 	ms_WindowParent->SetWindowCaption(tempCaption);
 }

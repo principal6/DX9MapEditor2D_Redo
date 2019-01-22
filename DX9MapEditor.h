@@ -7,7 +7,7 @@
 
 namespace DX9ENGINE
 {
-	const wchar_t MAP_EDITOR_NAME[]{ L"JW EDITOR [DirectX9 2D Game Map Editor] " };
+	const wchar_t MAP_EDITOR_NAME[]{ L"JW Map Editor" };
 
 	class DX9MapEditor final
 	{
