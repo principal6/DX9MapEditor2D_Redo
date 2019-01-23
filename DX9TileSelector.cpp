@@ -154,10 +154,29 @@ auto DX9MapTileSelector::SetMapInfo(SMapInfo* pInfo)->EError
 	return EError::OK;
 }
 
+void DX9MapTileSelector::UpdateMapMode(EMapMode Mode)
+{
+	switch (Mode)
+	{
+	case DX9ENGINE::EMapMode::TileMode:
+		m_MapSelector->SetTexture(m_pMapInfo->TileSheetName);
+		break;
+	case DX9ENGINE::EMapMode::MoveMode:
+		m_MapSelector->SetTexture(m_pMapInfo->MoveSheetName);
+		break;
+	default:
+		break;
+	}
+
+	InitializeSelectorPositionAndSize();
+}
+
 void DX9MapTileSelector::InitializeSelectorPositionAndSize()
 {
 	if (m_pMapInfo)
 	{
+		m_TileSelector->SetSize(D3DXVECTOR2(static_cast<float>(m_pMapInfo->TileSize),
+			static_cast<float>(m_pMapInfo->TileSize)));
 		m_TileSelector->SetPosition(D3DXVECTOR2(0, 0));
 
 		m_MapSelector->SetSize(m_TileSelector->GetSize());

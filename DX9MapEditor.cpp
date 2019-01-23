@@ -31,22 +31,20 @@ auto DX9ENGINE::GetRightChildPositionAndSizeFromParent(RECT Rect)->RECT
 	return Result;
 }
 
-
-
-void DX9MapEditor::SetMapEditorCaption()
+void DX9MapEditor::UpdateMapEditorCaption()
 {
 	WSTRING tempCaption = MAP_EDITOR_NAME;
 	tempCaption += L"  <MAP=\"";
 	tempCaption += ms_MapInfo.MapName;
 	tempCaption += L"\" (";
 	tempCaption += ConvertIntToWSTRING(ms_MapInfo.MapCols);
-	tempCaption += L"*";
+	tempCaption += L"x";
 	tempCaption += ConvertIntToWSTRING(ms_MapInfo.MapRows);
 	tempCaption += L")>  <TILE=\"";
 	tempCaption += ms_MapInfo.TileSheetName;
 	tempCaption += L"\" (";
 	tempCaption += ConvertIntToWSTRING(ms_MapInfo.TileSheetCols);
-	tempCaption += L"*";
+	tempCaption += L"x";
 	tempCaption += ConvertIntToWSTRING(ms_MapInfo.TileSheetRows);
 	tempCaption += L")>";
 
@@ -96,7 +94,7 @@ LRESULT CALLBACK DX9ENGINE::ParentWindowProc(HWND hWnd, UINT Message, WPARAM wPa
 					DX9MapEditor::LoadTileWindowImages();
 
 					// Set editor caption
-					DX9MapEditor::SetMapEditorCaption();
+					DX9MapEditor::UpdateMapEditorCaption();
 				}
 			}
 			break;
@@ -106,10 +104,12 @@ LRESULT CALLBACK DX9ENGINE::ParentWindowProc(HWND hWnd, UINT Message, WPARAM wPa
 		case ID_ACCELERATOR40008: // ACCEL F2
 		case ID_MODE_TILEMODE:
 			DX9MapEditor::ms_Map->SetMode(EMapMode::TileMode);
+			DX9MapEditor::ms_MapTileSelector->UpdateMapMode(DX9MapEditor::ms_Map->GetMode());
 			break;
 		case ID_ACCELERATOR40010: // ACCEL F3
 		case ID_MODE_MOVEMODE:
 			DX9MapEditor::ms_Map->SetMode(EMapMode::MoveMode);
+			DX9MapEditor::ms_MapTileSelector->UpdateMapMode(DX9MapEditor::ms_Map->GetMode());
 			break;
 		case ID_ACCELERATOR40017: // ACCEL F1
 		case ID_HELP_INFO:
@@ -170,7 +170,7 @@ LRESULT CALLBACK DX9ENGINE::RightChildWindowProc(HWND hWnd, UINT Message, WPARAM
 		DX9MapEditor::ms_MapTileSelector->UpdateMapSelector(DX9MapEditor::ms_WindowRight->GetMouseData());
 
 		// Set editor caption (for mouse position change)
-		DX9MapEditor::SetMapEditorCaption();
+		DX9MapEditor::UpdateMapEditorCaption();
 	}
 
 	return(DefWindowProc(hWnd, Message, wParam, lParam));
@@ -243,7 +243,7 @@ LRESULT CALLBACK DX9ENGINE::DlgProcNewMap(HWND hDlg, UINT iMessage, WPARAM wPara
 					DX9MapEditor::LoadTileWindowImages();
 
 					// Set editor caption
-					DX9MapEditor::SetMapEditorCaption();
+					DX9MapEditor::UpdateMapEditorCaption();
 				}
 			}
 		case IDCANCEL:

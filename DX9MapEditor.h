@@ -47,7 +47,7 @@ namespace DX9ENGINE
 		void DX9MapEditor::Destroy();
 
 		static void LoadTileWindowImages();
-		static void SetMapEditorCaption();
+		static void UpdateMapEditorCaption();
 
 		friend auto GetLeftChildPositionAndSizeFromParent(RECT Rect)->RECT;
 		friend auto GetRightChildPositionAndSizeFromParent(RECT Rect)->RECT;

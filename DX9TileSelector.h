@@ -9,6 +9,7 @@ namespace DX9ENGINE
 	class DX9Window;
 	struct SMouseData;
 	struct SMapInfo;
+	enum class EMapMode;
 	// ***
 
 	class DX9MapTileSelector final
@@ -22,6 +23,7 @@ namespace DX9ENGINE
 
 		void UpdateTileSelector(SMouseData* MouseData);
 		void UpdateMapSelector(SMouseData* MouseData);
+		void UpdateMapMode(EMapMode Mode);
 		void Draw();
 
 		auto SetMapInfo(SMapInfo* pInfo)->EError;
@@ -29,8 +31,8 @@ namespace DX9ENGINE
 		auto GetMapSelectorPositionInCells()->POINT;
 
 	private:
-		auto DX9MapTileSelector::ConvertPositionToCellXY(POINT Position)->POINT;
-		void DX9MapTileSelector::InitializeSelectorPositionAndSize();
+		auto ConvertPositionToCellXY(POINT Position)->POINT;
+		void InitializeSelectorPositionAndSize();
 
 	private:
 		static const int SEL_ALPHA = 160;
