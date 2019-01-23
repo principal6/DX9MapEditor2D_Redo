@@ -12,13 +12,13 @@
     <ClCompile Include="Core\DX9Line.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="DX9TileSelector.cpp" />
     <ClCompile Include="Core\DX9Window.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="Game\DX9Map.cpp">
       <Filter>Game</Filter>
     </ClCompile>
+    <ClCompile Include="DX9MapTileSelector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DX9MapEditor.h" />
@@ -37,13 +37,13 @@
     <ClInclude Include="resource.h">
       <Filter>리소스</Filter>
     </ClInclude>
-    <ClInclude Include="DX9TileSelector.h" />
     <ClInclude Include="Core\DX9Window.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Game\DX9Map.h">
       <Filter>Game</Filter>
     </ClInclude>
+    <ClInclude Include="DX9MapTileSelector.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
@@ -60,5 +60,8 @@
     <ResourceCompile Include="DX9MapEditor2D.rc">
       <Filter>리소스</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>

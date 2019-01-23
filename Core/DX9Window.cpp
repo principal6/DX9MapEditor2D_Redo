@@ -26,6 +26,12 @@ void DX9Window::EditorChildWindowMessageHandler(UINT Message, WPARAM wParam, LPA
 {
 	switch (Message)
 	{
+	case WM_MOUSEMOVE:
+		m_MouseData.MousePosition.x = GET_X_LPARAM(lParam);
+		m_MouseData.MousePosition.y = GET_Y_LPARAM(lParam);
+		m_MouseData.bOnMouseMove = true;
+		break;
+
 	case WM_LBUTTONDOWN:
 		if (!m_MouseData.bMouseLeftButtonPressed)
 		{
@@ -36,20 +42,39 @@ void DX9Window::EditorChildWindowMessageHandler(UINT Message, WPARAM wParam, LPA
 		}
 		break;
 
-	case WM_MOUSEMOVE:
-		m_MouseData.MousePosition.x = GET_X_LPARAM(lParam);
-		m_MouseData.MousePosition.y = GET_Y_LPARAM(lParam);
-		break;
-
 	case WM_LBUTTONUP:
 		m_MouseData.bMouseLeftButtonPressed = false;
+		break;
+
+	case WM_RBUTTONDOWN:
+		m_MouseData.bMouseRightButtonPressed = true;
+		break;
+
+	case WM_RBUTTONUP:
+		m_MouseData.bMouseRightButtonPressed = false;
 		break;
 	}
 }
 
-auto DX9Window::IsMousePressed()->bool
+auto DX9Window::IsMouseLeftButtonPressed() const->bool
 {
 	return m_MouseData.bMouseLeftButtonPressed;
+}
+
+auto DX9Window::IsMouseRightButtonPressed() const->bool
+{
+	return m_MouseData.bMouseRightButtonPressed;
+}
+
+auto DX9Window::OnMouseMove()->bool
+{
+	if (m_MouseData.bOnMouseMove)
+	{
+		m_MouseData.bOnMouseMove = false;
+		return true;
+	}
+	
+	return false;
 }
 
 DX9Window::DX9Window()

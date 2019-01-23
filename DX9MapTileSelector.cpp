@@ -1,4 +1,4 @@
-#include "DX9TileSelector.h"
+#include "DX9MapTileSelector.h"
 #include "Core/DX9Window.h"
 #include "Game/DX9Map.h"
 
@@ -7,7 +7,7 @@ using namespace DX9ENGINE;
 // Static member variable
 const wchar_t* DX9MapTileSelector::SEL_FN = L"tilesel.png";
 
-auto DX9MapTileSelector::ConvertPositionToCellXY(POINT Position)->POINT
+PRIVATE auto DX9MapTileSelector::ConvertPositionToCellXY(POINT Position)->POINT
 {
 	POINT Result{ 0, 0 };
 	
@@ -27,7 +27,7 @@ DX9MapTileSelector::DX9MapTileSelector()
 {
 	m_pMapInfo = nullptr;
 
-	m_SelectionStart = { 0, 0 };
+	m_TileSelectorPositionInCells = { 0, 0 };
 	m_SelectionSize = { 0, 0 };
 }
 
@@ -41,6 +41,7 @@ auto DX9MapTileSelector::Create(DX9Window* pTileSelectorWindow, DX9Window* pMapW
 	}
 	m_TileSelector->SetTexture(SEL_FN);
 	m_TileSelector->SetAlpha(SEL_ALPHA);
+	m_TileSelector->SetSize(D3DXVECTOR2(0, 0));
 
 	// Create map selector image
 	// Map selector's texture will be set when SetMapInfo() is called
@@ -83,21 +84,21 @@ void DX9MapTileSelector::UpdateTileSelector(SMouseData* MouseData)
 			m_SelectionSize.x = abs(DownPositionInCells.x - PositionInCells.x);
 			m_SelectionSize.y = abs(DownPositionInCells.y - PositionInCells.y);
 
-			m_SelectionStart = DownPositionInCells;
+			m_TileSelectorPositionInCells = DownPositionInCells;
 			if ((DownPositionInCells.x - PositionInCells.x) > 0)
 			{
 				// X position flip
-				m_SelectionStart.x = DownPositionInCells.x - m_SelectionSize.x;
+				m_TileSelectorPositionInCells.x = DownPositionInCells.x - m_SelectionSize.x;
 			}
 			if ((DownPositionInCells.y - PositionInCells.y) > 0)
 			{
 				// Y position flip
-				m_SelectionStart.y = DownPositionInCells.y - m_SelectionSize.y;
+				m_TileSelectorPositionInCells.y = DownPositionInCells.y - m_SelectionSize.y;
 			}
 
 			D3DXVECTOR2 NewPosition;
-			NewPosition.x = static_cast<float>(m_SelectionStart.x * m_pMapInfo->TileSize);
-			NewPosition.y = static_cast<float>(m_SelectionStart.y * m_pMapInfo->TileSize);
+			NewPosition.x = static_cast<float>(m_TileSelectorPositionInCells.x * m_pMapInfo->TileSize);
+			NewPosition.y = static_cast<float>(m_TileSelectorPositionInCells.y * m_pMapInfo->TileSize);
 
 			D3DXVECTOR2 NewSize{ 0, 0 };
 			NewSize.x = m_SelectionSize.x + 1.0f;
@@ -135,10 +136,15 @@ void DX9MapTileSelector::UpdateMapSelector(SMouseData* MouseData)
 void DX9MapTileSelector::Draw()
 {
 	if (m_TileSelector)
+	{
 		m_TileSelector->Draw();
+	}
 
 	if (m_MapSelector)
+	{
 		m_MapSelector->Draw();
+		m_MapSelector->DrawBoundingBox();
+	}
 }
 
 auto DX9MapTileSelector::SetMapInfo(SMapInfo* pInfo)->EError
@@ -171,7 +177,7 @@ void DX9MapTileSelector::UpdateMapMode(EMapMode Mode)
 	InitializeSelectorPositionAndSize();
 }
 
-void DX9MapTileSelector::InitializeSelectorPositionAndSize()
+PRIVATE void DX9MapTileSelector::InitializeSelectorPositionAndSize()
 {
 	if (m_pMapInfo)
 	{
@@ -184,7 +190,17 @@ void DX9MapTileSelector::InitializeSelectorPositionAndSize()
 	}
 }
 
-auto DX9MapTileSelector::GetMapSelectorPositionInCells()->POINT
+auto DX9MapTileSelector::GetTileSelectorPositionInCells() const->POINT
+{
+	return m_TileSelectorPositionInCells;
+}
+
+auto DX9MapTileSelector::GetMapSelectorPositionInCells() const->POINT
 {
 	return m_MapSelectorPositionInCells;
+}
+
+auto DX9MapTileSelector::GetSelectionSizeInCells() const->POINT
+{
+	return m_SelectionSize;
 }

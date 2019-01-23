@@ -34,12 +34,17 @@
 
 #define DX9MAPEDITOR
 
+// To distinguish protected functions from others in cpp files
+#define PROTECTED
+// To distinguish private functions from others in cpp files
+#define PRIVATE
+
 namespace DX9ENGINE
 {
 	#define DX_SUCCEEDED(func) (func == EError::OK)
 	#define DX_FAILED(func) (func != EError::OK)
 	#define DX_DESTROY(obj) {if(obj) {obj->Destroy(); delete obj; obj = nullptr;}}
-	#define DX_DESTROY_UNIQUE(obj) {if(obj) {obj->Destroy();}}
+	#define DX_DESTROY_SMART(obj) {if(obj) {obj->Destroy();}}
 	#define DX_RELEASE(obj) {if(obj) {obj->Release(); obj = nullptr;}}
 
 	using CINT = const int;

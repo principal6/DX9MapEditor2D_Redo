@@ -4,15 +4,15 @@
 using namespace DX9ENGINE;
 
 // Static member variables
-DX9Window* DX9MapEditor::ms_WindowParent;
-DX9Window* DX9MapEditor::ms_WindowLeft;
-DX9Window* DX9MapEditor::ms_WindowRight;
+UNIQUE_PTR<DX9Window> DX9MapEditor::ms_WindowParent;
+UNIQUE_PTR<DX9Window> DX9MapEditor::ms_WindowLeft;
+UNIQUE_PTR<DX9Window> DX9MapEditor::ms_WindowRight;
 RECT DX9MapEditor::ms_TempRect;
 SMapInfo DX9MapEditor::ms_MapInfo;
 UNIQUE_PTR<DX9Image> DX9MapEditor::ms_TileImage;
 UNIQUE_PTR<DX9Image> DX9MapEditor::ms_MoveImage;
 UNIQUE_PTR<DX9Image> DX9MapEditor::ms_MapBG;
-DX9Map* DX9MapEditor::ms_Map;
+UNIQUE_PTR<DX9Map> DX9MapEditor::ms_Map;
 UNIQUE_PTR<DX9MapTileSelector> DX9MapEditor::ms_MapTileSelector;
 
 auto DX9ENGINE::GetLeftChildPositionAndSizeFromParent(RECT Rect)->RECT
@@ -34,32 +34,38 @@ auto DX9ENGINE::GetRightChildPositionAndSizeFromParent(RECT Rect)->RECT
 void DX9MapEditor::UpdateMapEditorCaption()
 {
 	WSTRING tempCaption = MAP_EDITOR_NAME;
-	tempCaption += L"  <MAP=\"";
-	tempCaption += ms_MapInfo.MapName;
-	tempCaption += L"\" (";
-	tempCaption += ConvertIntToWSTRING(ms_MapInfo.MapCols);
-	tempCaption += L"x";
-	tempCaption += ConvertIntToWSTRING(ms_MapInfo.MapRows);
-	tempCaption += L")>  <TILE=\"";
-	tempCaption += ms_MapInfo.TileSheetName;
-	tempCaption += L"\" (";
-	tempCaption += ConvertIntToWSTRING(ms_MapInfo.TileSheetCols);
-	tempCaption += L"x";
-	tempCaption += ConvertIntToWSTRING(ms_MapInfo.TileSheetRows);
-	tempCaption += L")>";
 
-	tempCaption += L"  <MOUSE= ";
-	tempCaption += ConvertIntToWSTRING(ms_MapTileSelector->GetMapSelectorPositionInCells().x);
-	tempCaption += L" / ";
-	tempCaption += ConvertIntToWSTRING(ms_MapTileSelector->GetMapSelectorPositionInCells().y);
-	tempCaption += L">";
+	if (ms_MapInfo.MapName.size())
+	{
+		tempCaption += L"  #Map=\"";
+		tempCaption += ms_MapInfo.MapName;
+		tempCaption += L"\" (";
+		tempCaption += ConvertIntToWSTRING(ms_MapInfo.MapCols);
+		tempCaption += L"x";
+		tempCaption += ConvertIntToWSTRING(ms_MapInfo.MapRows);
+		tempCaption += L") #TileSize=";
+		tempCaption += ConvertIntToWSTRING(ms_MapInfo.TileSize);
+		tempCaption += L" #Tile=\"";
+		tempCaption += ms_MapInfo.TileSheetName;
+		tempCaption += L"\" (";
+		tempCaption += ConvertIntToWSTRING(ms_MapInfo.TileSheetCols);
+		tempCaption += L"x";
+		tempCaption += ConvertIntToWSTRING(ms_MapInfo.TileSheetRows);
+		tempCaption += L")";
 
+		tempCaption += L" #Mouse= ";
+		tempCaption += ConvertIntToWSTRING(ms_MapTileSelector->GetMapSelectorPositionInCells().x);
+		tempCaption += L" / ";
+		tempCaption += ConvertIntToWSTRING(ms_MapTileSelector->GetMapSelectorPositionInCells().y);
+	}
+	
 	ms_WindowParent->SetWindowCaption(tempCaption);
 }
 
-void DX9MapEditor::LoadTileWindowImages()
+void DX9MapEditor::LoadTileImages()
 {
 	ms_Map->GetMapInfo(&ms_MapInfo);
+
 	ms_TileImage->SetTexture(ms_MapInfo.TileSheetName);
 	ms_MoveImage->SetTexture(ms_MapInfo.MoveSheetName);
 	ms_MapTileSelector->SetMapInfo(&ms_MapInfo);
@@ -75,12 +81,12 @@ LRESULT CALLBACK DX9ENGINE::ParentWindowProc(HWND hWnd, UINT Message, WPARAM wPa
 		// Menu & accelerator
 		switch (LOWORD(wParam)) // in LOWORD of wParam is the resource id
 		{
-		case ID_ACCELERATOR40013: // ACCEL Ctrl + N
+		case ID_ACCELERATOR40013: // ACCEL <Ctrl + N>
 		case ID_MAP_NEWMAP:
 			// Show new map dialog
 			DialogBox(nullptr, MAKEINTRESOURCE(IDD_DIALOG1), DX9MapEditor::ms_WindowParent->GethWnd(), DlgProcNewMap);
 			break;
-		case ID_ACCELERATOR40014: // ACCEL Ctrl + O
+		case ID_ACCELERATOR40014: // ACCEL <Ctrl + O>
 		case ID_MAP_OPENMAP:
 			// Show load map dialog
 			if (DX9MapEditor::ms_WindowParent->OpenFileDlg(L"JWM File\0*.jwm\0"))
@@ -91,42 +97,50 @@ LRESULT CALLBACK DX9ENGINE::ParentWindowProc(HWND hWnd, UINT Message, WPARAM wPa
 					DX9MapEditor::ms_Map->LoadMap(DX9MapEditor::ms_WindowParent->GetDlgFileTitle());
 
 					// Load tile images
-					DX9MapEditor::LoadTileWindowImages();
+					DX9MapEditor::LoadTileImages();
 
 					// Set editor caption
 					DX9MapEditor::UpdateMapEditorCaption();
 				}
 			}
 			break;
-		case ID_ACCELERATOR40015: // ACCEL Ctrl + S
+		case ID_ACCELERATOR40015: // ACCEL <Ctrl + S>
 		case ID_MAP_SAVEMAP:
+			// Show load map dialog
+			if (DX9MapEditor::ms_Map->DoesMapExist())
+			{
+				if (DX9MapEditor::ms_WindowParent->SaveFileDlg(L"JWM File\0*.jwm\0"))
+				{
+					DX9MapEditor::ms_Map->SaveMap(DX9MapEditor::ms_WindowParent->GetDlgFileTitle());
+				}
+			}
 			break;
-		case ID_ACCELERATOR40008: // ACCEL F2
+		case ID_ACCELERATOR40017: // ACCEL <F1>
+		case ID_HELP_INFO:
+			break;
+		case ID_ACCELERATOR40008: // ACCEL <F2>
 		case ID_MODE_TILEMODE:
 			DX9MapEditor::ms_Map->SetMode(EMapMode::TileMode);
 			DX9MapEditor::ms_MapTileSelector->UpdateMapMode(DX9MapEditor::ms_Map->GetMode());
 			break;
-		case ID_ACCELERATOR40010: // ACCEL F3
+		case ID_ACCELERATOR40010: // ACCEL <F3>
 		case ID_MODE_MOVEMODE:
 			DX9MapEditor::ms_Map->SetMode(EMapMode::MoveMode);
 			DX9MapEditor::ms_MapTileSelector->UpdateMapMode(DX9MapEditor::ms_Map->GetMode());
 			break;
-		case ID_ACCELERATOR40017: // ACCEL F1
-		case ID_HELP_INFO:
-			break;
 		}
 		break;
 	case WM_SIZE:
-		// Resize ms_BaseLeft and ms_BaseRight and their correspondent window in accordance with the parent window size
+		// Resize ms_WindowLeft and ms_WindowRight and their correspondent window in accordance with the parent window size
 		if (DX9MapEditor::ms_WindowLeft && DX9MapEditor::ms_WindowRight)
 		{
-			// Resize ms_BaseLeft and its correspondent window
+			// Resize ms_WindowLeft and its correspondent window
 			GetClientRect(hWnd, &DX9MapEditor::ms_TempRect);
 			DX9MapEditor::ms_TempRect = GetLeftChildPositionAndSizeFromParent(DX9MapEditor::ms_TempRect);
 			MoveWindow(DX9MapEditor::ms_WindowLeft->GethWnd(), DX9MapEditor::ms_TempRect.left, DX9MapEditor::ms_TempRect.top,
 				DX9MapEditor::ms_TempRect.right, DX9MapEditor::ms_TempRect.bottom, TRUE);
 
-			// Resize ms_BaseRight and its correspondent window
+			// Resize ms_WindowRight and its correspondent window
 			GetClientRect(hWnd, &DX9MapEditor::ms_TempRect);
 			DX9MapEditor::ms_TempRect = GetRightChildPositionAndSizeFromParent(DX9MapEditor::ms_TempRect);
 			MoveWindow(DX9MapEditor::ms_WindowRight->GethWnd(), DX9MapEditor::ms_TempRect.left, DX9MapEditor::ms_TempRect.top,
@@ -152,7 +166,7 @@ LRESULT CALLBACK DX9ENGINE::LeftChildWindowProc(HWND hWnd, UINT Message, WPARAM 
 
 	if (DX9MapEditor::ms_MapTileSelector)
 	{
-		if (DX9MapEditor::ms_WindowLeft->IsMousePressed())
+		if (DX9MapEditor::ms_WindowLeft->IsMouseLeftButtonPressed())
 		{
 			DX9MapEditor::ms_MapTileSelector->UpdateTileSelector(DX9MapEditor::ms_WindowLeft->GetMouseData());
 		}
@@ -168,6 +182,18 @@ LRESULT CALLBACK DX9ENGINE::RightChildWindowProc(HWND hWnd, UINT Message, WPARAM
 	if (DX9MapEditor::ms_MapTileSelector)
 	{
 		DX9MapEditor::ms_MapTileSelector->UpdateMapSelector(DX9MapEditor::ms_WindowRight->GetMouseData());
+
+		if (DX9MapEditor::ms_WindowRight->IsMouseLeftButtonPressed())
+		{
+			// Edit map with seleted tiles
+			DX9MapEditor::ms_Map->EditMap(DX9MapEditor::ms_MapTileSelector.get());
+		}
+
+		if (DX9MapEditor::ms_WindowRight->IsMouseRightButtonPressed())
+		{
+			// Edit map with seleted tiles
+			DX9MapEditor::ms_Map->EditMap(DX9MapEditor::ms_MapTileSelector.get(), true);
+		}
 
 		// Set editor caption (for mouse position change)
 		DX9MapEditor::UpdateMapEditorCaption();
@@ -237,10 +263,10 @@ LRESULT CALLBACK DX9ENGINE::DlgProcNewMap(HWND hDlg, UINT iMessage, WPARAM wPara
 				if (DX9MapEditor::ms_MapInfo.MapCols && DX9MapEditor::ms_MapInfo.MapRows)
 				{
 					// Create a new map
-					DX9MapEditor::ms_Map->CreateNewMap(&DX9MapEditor::ms_MapInfo);
+					DX9MapEditor::ms_Map->CreateMap(&DX9MapEditor::ms_MapInfo);
 
 					// Load tile images
-					DX9MapEditor::LoadTileWindowImages();
+					DX9MapEditor::LoadTileImages();
 
 					// Set editor caption
 					DX9MapEditor::UpdateMapEditorCaption();
@@ -257,12 +283,15 @@ LRESULT CALLBACK DX9ENGINE::DlgProcNewMap(HWND hDlg, UINT iMessage, WPARAM wPara
 
 auto DX9MapEditor::Create(int Width, int Height)->EError
 {
+	// Kill the console window, which is for debugging
+	FreeConsole();
+
 	// Set base directory
 	memset(m_BaseDir, 0, sizeof(m_BaseDir));
 	GetCurrentDirectoryW(MAX_FILE_LEN, m_BaseDir);
 
 	// Create parent window
-	if (ms_WindowParent = new DX9Window)
+	if (ms_WindowParent = MAKE_UNIQUE(DX9Window)())
 	{
 		if (DX_FAILED(ms_WindowParent->CreateParentWindow(WINDOW_X, WINDOW_Y, Width, Height,
 			D3DCOLOR_XRGB(50, 50, 80), ParentWindowProc, MAKEINTRESOURCE(IDR_MENU1))))
@@ -279,7 +308,7 @@ auto DX9MapEditor::Create(int Width, int Height)->EError
 	m_hAccel = LoadAccelerators(nullptr, MAKEINTRESOURCE(IDR_ACCELERATOR1));
 
 	// Create left child base and initialize Direct3D9
-	if (ms_WindowLeft = new DX9Window)
+	if (ms_WindowLeft = MAKE_UNIQUE(DX9Window)())
 	{
 		// Get main window RECT
 		GetClientRect(m_hWndMain, &ms_TempRect);
@@ -292,17 +321,17 @@ auto DX9MapEditor::Create(int Width, int Height)->EError
 	// Create image objects
 	if (ms_TileImage = MAKE_UNIQUE(DX9Image)())
 	{
-		if (DX_FAILED(ms_TileImage->Create(ms_WindowLeft, m_BaseDir)))
+		if (DX_FAILED(ms_TileImage->Create(ms_WindowLeft.get(), m_BaseDir)))
 			return EError::IMAGE_NOT_CREATED;
 	}
 	if (ms_MoveImage = MAKE_UNIQUE(DX9Image)())
 	{
-		if (DX_FAILED(ms_MoveImage->Create(ms_WindowLeft, m_BaseDir)))
+		if (DX_FAILED(ms_MoveImage->Create(ms_WindowLeft.get(), m_BaseDir)))
 			return EError::IMAGE_NOT_CREATED;
 	}
 
 	// Create right child base and initialize Direct3D9
-	if (ms_WindowRight = new DX9Window)
+	if (ms_WindowRight = MAKE_UNIQUE(DX9Window)())
 	{
 		// Get main window RECT
 		GetClientRect(m_hWndMain, &ms_TempRect);
@@ -313,16 +342,16 @@ auto DX9MapEditor::Create(int Width, int Height)->EError
 	}
 	
 	// Create map object
-	if (ms_Map = new DX9Map)
+	if (ms_Map = MAKE_UNIQUE(DX9Map)())
 	{
-		if (DX_FAILED(ms_Map->Create(ms_WindowRight, m_BaseDir)))
+		if (DX_FAILED(ms_Map->Create(ms_WindowRight.get(), m_BaseDir)))
 			return EError::MAP_NOT_CREATED;
 	}
 
 	// Create map background
 	if (ms_MapBG = MAKE_UNIQUE(DX9Image)())
 	{
-		if (DX_FAILED(ms_MapBG->Create(ms_WindowRight, m_BaseDir)))
+		if (DX_FAILED(ms_MapBG->Create(ms_WindowRight.get(), m_BaseDir)))
 			return EError::IMAGE_NOT_CREATED;
 		ms_MapBG->SetXRGB(D3DCOLOR_XRGB(20, 20, 80));
 	}
@@ -330,7 +359,7 @@ auto DX9MapEditor::Create(int Width, int Height)->EError
 	// Create map-tile selector
 	if (ms_MapTileSelector = MAKE_UNIQUE(DX9MapTileSelector)())
 	{
-		if (DX_FAILED(ms_MapTileSelector->Create(ms_WindowLeft, ms_WindowRight, m_BaseDir)))
+		if (DX_FAILED(ms_MapTileSelector->Create(ms_WindowLeft.get(), ms_WindowRight.get(), m_BaseDir)))
 			return EError::TILESELECTOR_NOT_CREATED;
 	}
 
@@ -405,11 +434,11 @@ void DX9MapEditor::MainLoop()
 
 void DX9MapEditor::Destroy()
 {
-	DX_DESTROY(ms_Map);
-	DX_DESTROY_UNIQUE(ms_MapTileSelector);
-	DX_DESTROY_UNIQUE(ms_TileImage);
-	DX_DESTROY_UNIQUE(ms_MoveImage);
-	DX_DESTROY(ms_WindowLeft);
-	DX_DESTROY(ms_WindowRight);
-	DX_DESTROY(ms_WindowParent);
+	DX_DESTROY_SMART(ms_Map);
+	DX_DESTROY_SMART(ms_MapTileSelector);
+	DX_DESTROY_SMART(ms_TileImage);
+	DX_DESTROY_SMART(ms_MoveImage);
+	DX_DESTROY_SMART(ms_WindowLeft);
+	DX_DESTROY_SMART(ms_WindowRight);
+	DX_DESTROY_SMART(ms_WindowParent);
 }

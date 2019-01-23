@@ -28,7 +28,9 @@ namespace DX9ENGINE
 
 		auto SetMapInfo(SMapInfo* pInfo)->EError;
 
-		auto GetMapSelectorPositionInCells()->POINT;
+		auto GetTileSelectorPositionInCells() const->POINT;
+		auto GetMapSelectorPositionInCells() const->POINT;
+		auto GetSelectionSizeInCells() const->POINT;
 
 	private:
 		auto ConvertPositionToCellXY(POINT Position)->POINT;
@@ -39,7 +41,7 @@ namespace DX9ENGINE
 		static const wchar_t* SEL_FN;
 
 		SMapInfo* m_pMapInfo;
-		POINT m_SelectionStart;
+		POINT m_TileSelectorPositionInCells;
 		POINT m_SelectionSize;
 		UNIQUE_PTR<DX9Image> m_TileSelector;
 		UNIQUE_PTR<DX9Image> m_MapSelector;

@@ -3,7 +3,7 @@
 #include "resource.h"
 #include "Core/DX9Window.h"
 #include "Game/DX9Map.h"
-#include "DX9TileSelector.h"
+#include "DX9MapTileSelector.h"
 
 namespace DX9ENGINE
 {
@@ -20,9 +20,9 @@ namespace DX9ENGINE
 		static const int WINDOW_HSCROLL_SIZE = 15;
 		static const int WINDOW_PADDING_X = 10;
 
-		static DX9Window* ms_WindowParent;
-		static DX9Window* ms_WindowLeft;
-		static DX9Window* ms_WindowRight;
+		static UNIQUE_PTR<DX9Window> ms_WindowParent;
+		static UNIQUE_PTR<DX9Window> ms_WindowLeft;
+		static UNIQUE_PTR<DX9Window> ms_WindowRight;
 		static RECT ms_TempRect;
 		static SMapInfo ms_MapInfo;
 
@@ -32,7 +32,7 @@ namespace DX9ENGINE
 		
 		// For right child window
 		static UNIQUE_PTR<DX9Image> ms_MapBG;
-		static DX9Map* ms_Map;
+		static UNIQUE_PTR<DX9Map> ms_Map;
 
 		// For both child windows
 		static UNIQUE_PTR<DX9MapTileSelector> ms_MapTileSelector;
@@ -46,7 +46,7 @@ namespace DX9ENGINE
 	private:
 		void DX9MapEditor::Destroy();
 
-		static void LoadTileWindowImages();
+		static void LoadTileImages();
 		static void UpdateMapEditorCaption();
 
 		friend auto GetLeftChildPositionAndSizeFromParent(RECT Rect)->RECT;

@@ -47,8 +47,10 @@ namespace DX9ENGINE
 		POINT MousePosition;
 		POINT MouseDownPosition;
 		bool bMouseLeftButtonPressed;
+		bool bMouseRightButtonPressed;
+		bool bOnMouseMove;
 
-		SMouseData() : bMouseLeftButtonPressed(false) {};
+		SMouseData() : bMouseLeftButtonPressed(false), bOnMouseMove(false) {};
 	};
 
 	class DX9Window final
@@ -86,7 +88,9 @@ namespace DX9ENGINE
 
 		// Editor message handler
 		void DX9Window::EditorChildWindowMessageHandler(UINT Message, WPARAM wParam, LPARAM lParam);
-		auto DX9Window::IsMousePressed()->bool;
+		auto DX9Window::IsMouseLeftButtonPressed() const->bool;
+		auto DX9Window::IsMouseRightButtonPressed() const->bool;
+		auto DX9Window::OnMouseMove()->bool;
 
 	private:
 		auto DX9Window::CreateWINAPIWindow(const wchar_t* Name, CINT X, CINT Y, CINT Width, CINT Height,
